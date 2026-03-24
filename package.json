@@ -1,0 +1,59 @@
+{
+  "name": "gen-plasma-nft-collection",
+  "version": "1.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network plasma",
+    "verify": "hardhat run scripts/verify-contract.js --network plasma",
+    "check-funds": "node scripts/check-funds.js",
+    "withdraw-funds": "node scripts/withdraw-funds.js"
+  },
+  "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
+    "@rainbow-me/rainbowkit": "^1.1.0",
+    "@supabase/supabase-js": "^2.39.0",
+    "@tanstack/react-query": "^4.35.0",
+    "@types/formidable": "^3.4.5",
+    "@vercel/blob": "^0.20.0",
+    "@vercel/kv": "^0.2.0",
+    "clsx": "^2.0.0",
+    "formidable": "^3.5.4",
+    "js-sha3": "^0.9.3",
+    "lucide-react": "^0.294.0",
+    "merkletreejs": "^0.3.11",
+    "next": "14.0.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "seedrandom": "^3.0.5",
+    "solc": "^0.8.30",
+    "tailwindcss": "^3.3.0",
+    "viem": "^1.15.0",
+    "wagmi": "^1.4.3"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "@openzeppelin/contracts": "^5.0.0",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/seedrandom": "^3.0.5",
+    "autoprefixer": "^10.0.1",
+    "dotenv": "^17.2.2",
+    "eslint": "^8",
+    "eslint-config-next": "14.0.0",
+    "ethers": "^6.7.1",
+    "hardhat": "^2.19.0",
+    "postcss": "^8",
+    "typescript": "^5"
+  }
+}

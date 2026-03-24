@@ -1,0 +1,1 @@
+ALTER TABLE editions_artwork DISABLE ROW LEVEL SECURITY;
