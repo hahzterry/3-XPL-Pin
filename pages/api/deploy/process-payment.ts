@@ -1,3 +1,4 @@
+import { requireApiKey } from '../_auth'
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createPublicClient, http, parseEther, formatEther } from 'viem';
 
@@ -35,8 +36,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.setHeader('Content-Type', 'application/json');
   
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' })
   }
+  if (!requireApiKey(req, res)) return
 
   try {
     const { userAddress, amount, transactionHash, deploymentId } = req.body as PaymentRequest;

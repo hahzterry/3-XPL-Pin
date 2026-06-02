@@ -1,3 +1,4 @@
+import { requireApiKey } from '../_auth'
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createWalletClient, http, createPublicClient, parseEther, formatEther } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
@@ -45,8 +46,9 @@ interface DeploymentResult {
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' })
   }
+  if (!requireApiKey(req, res)) return
 
   try {
     const { deploymentId, contractCode, constructorArgs, contractName, userAddress } = req.body as DeploymentRequest;
@@ -78,7 +80,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       throw new Error(`Invalid private key length: ${formattedPrivateKey.length}. Expected 66 characters (0x + 64 hex)`);
     }
 
-    console.log('Using private key:', formattedPrivateKey.substring(0, 10) + '...');
+    console.log('Using deployer key: configured');
 
     // Create deployer account
     const deployerAccount = privateKeyToAccount(formattedPrivateKey as `0x${string}`);

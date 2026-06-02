@@ -1,9 +1,11 @@
+import { requireApiKey } from '../_auth'
 import { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Method not allowed' })
   }
+  if (!requireApiKey(req, res)) return
 
   try {
     const { contractAddress, artworkName, artworkDescription, artworkImage, artistName, attributes } = req.body;
