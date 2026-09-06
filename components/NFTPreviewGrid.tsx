@@ -1,216 +1,507 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
 
-interface NFTPreviewGridProps {
-  quantity: number;
+interface NFTMetadata {
+  tokenId: number;
+  name: string;
+  description: string;
+  image: string;
+  attributes: Array<{
+    trait_type: string;
+    value: string;
+    rarity?: number;
+  }>;
+  properties?: {
+    shader_properties?: {
+      energy_score?: number;
+    };
+  };
 }
 
-export default function NFTPreviewGrid({ quantity }: NFTPreviewGridProps) {
-  const [previewTokenIds, setPreviewTokenIds] = useState<number[]>([]);
-  const [loadingStates, setLoadingStates] = useState<boolean[]>([]);
-  const [errorStates, setErrorStates] = useState<boolean[]>([]);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); // Force refresh key
+interface WalletNFTCardProps {
+  nft: NFTMetadata;
+  onTransfer: (tokenId: number) => void;
+}
 
-  // Generate random token IDs for preview
-  const generateRandomTokenIds = (count: number): number[] => {
-    const tokenIds: number[] = [];
-    for (let i = 0; i < count; i++) {
-      // Generate random token IDs between 1 and 10000
-      const randomId = Math.floor(Math.random() * 10000) + 1;
-      tokenIds.push(randomId);
+export default function WalletNFTCard({
+  nft,
+  onTransfer,
+}: WalletNFTCardProps) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Keep the existing metadata compatibility.
+  // The values are displayed using neutral 3 Word Pin terminology.
+  const locationType =
+    nft.attributes?.find(
+      (attr) => attr.trait_type === 'Energy Level'
+    )?.value || '3 Word Pin';
+
+  const energyScore =
+    nft.properties?.shader_properties?.energy_score || 0;
+
+  const getLocationTypeStyle = (level: string) => {
+    switch (level) {
+      case 'Fusion Core':
+        return 'text-pink-300 border-pink-400/30 bg-pink-500/10';
+
+      case 'Plasma State':
+        return 'text-cyan-300 border-cyan-400/30 bg-cyan-400/10';
+
+      case 'High Energy':
+        return 'text-white border-white/20 bg-white/10';
+
+      case 'Medium Energy':
+        return 'text-cyan-200 border-cyan-400/20 bg-cyan-400/10';
+
+      default:
+        return 'text-gray-300 border-white/15 bg-white/5';
     }
-    return tokenIds;
-  };
-
-  // Initialize preview token IDs
-  useEffect(() => {
-    const tokenIds = generateRandomTokenIds(quantity);
-    setPreviewTokenIds(tokenIds);
-    setLoadingStates(new Array(quantity).fill(true));
-    setErrorStates(new Array(quantity).fill(false));
-  }, [quantity]);
-
-  // Handle refresh button click
-  const handleRefresh = () => {
-    setIsRefreshing(true);
-    setLoadingStates(new Array(quantity).fill(true));
-    setErrorStates(new Array(quantity).fill(false));
-    
-    // Add a small delay for better UX and increment refresh key for cache busting
-    setTimeout(() => {
-      const newTokenIds = generateRandomTokenIds(quantity);
-      setPreviewTokenIds(newTokenIds);
-      setRefreshKey(prev => prev + 1); // Force new requests
-      setIsRefreshing(false);
-    }, 300);
-  };
-
-  // Handle individual image load
-  const handleImageLoad = (index: number) => {
-    setLoadingStates(prev => {
-      const newStates = [...prev];
-      newStates[index] = false;
-      return newStates;
-    });
-  };
-
-  // Handle individual image error
-  const handleImageError = (index: number) => {
-    const failedTokenId = previewTokenIds[index];
-    console.warn(`Image failed to load for tokenId: ${failedTokenId}, refreshKey: ${refreshKey}`);
-    
-    // Try to generate a new tokenId automatically for this slot
-    const newTokenIds = [...previewTokenIds];
-    let newTokenId;
-    let attempts = 0;
-    
-    // Try to find a different tokenId (avoid the failed one)
-    do {
-      newTokenId = Math.floor(Math.random() * 10000) + 1;
-      attempts++;
-    } while (newTokenId === failedTokenId && attempts < 10);
-    
-    newTokenIds[index] = newTokenId;
-    setPreviewTokenIds(newTokenIds);
-    
-    // Reset states for this image
-    setLoadingStates(prev => {
-      const newStates = [...prev];
-      newStates[index] = true; // Set to loading to try the new tokenId
-      return newStates;
-    });
-    setErrorStates(prev => {
-      const newStates = [...prev];
-      newStates[index] = false;
-      return newStates;
-    });
-    
-    // If this is the second failure for this slot, then show error
-    setTimeout(() => {
-      setLoadingStates(prev => {
-        const newStates = [...prev];
-        if (newStates[index] === true) { // Still loading after timeout
-          newStates[index] = false;
-          setErrorStates(errorPrev => {
-            const errorStates = [...errorPrev];
-            errorStates[index] = true;
-            return errorStates;
-          });
-        }
-        return newStates;
-      });
-    }, 5000); // 5 second timeout
-  };
-
-  // Retry loading a specific image
-  const retryImage = (index: number) => {
-    setErrorStates(prev => {
-      const newStates = [...prev];
-      newStates[index] = false;
-      return newStates;
-    });
-    setLoadingStates(prev => {
-      const newStates = [...prev];
-      newStates[index] = true;
-      return newStates;
-    });
-    
-    // Generate a new token ID for this specific image and force refresh
-    const newTokenIds = [...previewTokenIds];
-    newTokenIds[index] = Math.floor(Math.random() * 10000) + 1;
-    setPreviewTokenIds(newTokenIds);
-    setRefreshKey(prev => prev + 1); // Force cache bust
   };
 
   return (
-    <div className="mb-8">
-      {/* Header with refresh button */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex-1">
-          <h4 className="text-xl font-semibold text-gray-300 mb-2">Preview Your NFTs</h4>
-          <p className="text-sm text-gray-400">Live generative previews</p>
-        </div>
-        <button
-          onClick={handleRefresh}
-          disabled={isRefreshing}
-          className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-forest-400/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          title="Generate new previews"
-        >
-          <ArrowPathIcon className={`w-6 h-6 text-forest-400 ${isRefreshing ? 'animate-spin' : ''}`} />
-        </button>
-      </div>
+    <div
+      className="
+        group
+        relative
+        overflow-hidden
+        rounded-2xl
+        bg-black/80
+        backdrop-blur-xl
+        border border-white/10
+        p-4
+        transition-all
+        duration-300
+        hover:-translate-y-1
+        hover:border-cyan-400/30
+        hover:shadow-[0_0_35px_rgba(0,242,234,0.10)]
+      "
+    >
+      {/* Ambient glow */}
+      <div
+        className="
+          pointer-events-none
+          absolute
+          -top-16
+          -right-16
+          w-32
+          h-32
+          rounded-full
+          bg-cyan-400/10
+          blur-3xl
+          opacity-0
+          group-hover:opacity-100
+          transition-opacity
+          duration-500
+        "
+      />
 
-      {/* Preview Grid - Full width horizontal layout */}
-      <div className={`grid gap-4 ${
-        quantity === 1 ? 'grid-cols-1 max-w-80 mx-auto' :
-        quantity === 2 ? 'grid-cols-2' :
-        quantity === 3 ? 'grid-cols-3' :
-        quantity === 4 ? 'grid-cols-4' :
-        'grid-cols-5'
-      }`}>
-        {previewTokenIds.map((tokenId, index) => (
-          <div key={`${tokenId}-${index}`} className="group">
-            <div className="aspect-square bg-gradient-to-br from-forest-500/20 to-forest-700/30 rounded-lg overflow-hidden relative border border-white/10 hover:border-forest-400/30 transition-all duration-300">
-              {/* Loading spinner */}
-              {loadingStates[index] && !errorStates[index] && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-6 h-6 border-2 border-forest-400 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
-              
-              {/* Error state with retry button */}
-              {errorStates[index] && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/20 backdrop-blur-sm">
-                  <div className="text-red-400 text-xs mb-2 text-center px-2">
-                    Failed to load
-                  </div>
-                  <button
-                    onClick={() => retryImage(index)}
-                    className="px-3 py-1 bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 rounded text-xs text-red-300 transition-all duration-200"
-                  >
-                    Retry
-                  </button>
-                </div>
-              )}
-              
-              {/* NFT Image */}
-              {!errorStates[index] && (
-                <Image
-                  key={`${tokenId}-${refreshKey}`} // Force re-render on refresh
-                  src={`/api/image/${tokenId}?v=${refreshKey}`} // Add version parameter for cache busting
-                  alt={`Preview NFT #${tokenId}`}
-                  fill
-                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                  className={`object-cover transition-all duration-300 ${
-                    loadingStates[index] ? 'opacity-0' : 'opacity-100'
-                  } group-hover:scale-105`}
-                  onLoad={() => handleImageLoad(index)}
-                  onError={() => handleImageError(index)}
-                  priority={index < 2} // Prioritize loading first 2 images
-                  unoptimized // Disable Next.js image optimization for SVGs
-                />
-              )}
-              
-              {/* Token ID overlay */}
-              <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded backdrop-blur-sm">
-                #{tokenId}
+      <div
+        className="
+          pointer-events-none
+          absolute
+          -bottom-16
+          -left-16
+          w-32
+          h-32
+          rounded-full
+          bg-pink-500/10
+          blur-3xl
+          opacity-0
+          group-hover:opacity-100
+          transition-opacity
+          duration-500
+        "
+      />
+
+      {/* =========================================================
+          IMAGE
+      ========================================================== */}
+      <div
+        className="
+          relative
+          aspect-square
+          rounded-xl
+          overflow-hidden
+          mb-4
+          bg-black
+          border border-cyan-400/15
+          shadow-[inset_0_0_30px_rgba(0,242,234,0.04)]
+        "
+      >
+        {/* Loading State */}
+        {!imageLoaded && !imageError && (
+          <div
+            className="
+              absolute
+              inset-0
+              flex
+              items-center
+              justify-center
+              bg-gradient-to-br
+              from-cyan-400/10
+              via-black
+              to-pink-500/10
+            "
+          >
+            <div
+              className="
+                w-7
+                h-7
+                rounded-full
+                border-2
+                border-cyan-300/30
+                border-t-cyan-300
+                border-r-pink-400
+                animate-spin
+              "
+            />
+          </div>
+        )}
+
+        {/* Image Error */}
+        {imageError ? (
+          <div
+            className="
+              absolute
+              inset-0
+              flex
+              items-center
+              justify-center
+              bg-gradient-to-br
+              from-cyan-400/5
+              via-black
+              to-pink-500/5
+            "
+          >
+            <div className="text-center text-gray-400">
+              <div className="text-3xl mb-2">🖼️</div>
+
+              <div className="text-xs font-semibold text-gray-300">
+                Image Unavailable
               </div>
-              
-              {/* Hover effect */}
-              <div className="absolute inset-0 bg-gradient-to-t from-forest-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+              <div className="text-xs mt-1 text-gray-500">
+                Pin #{nft.tokenId}
+              </div>
             </div>
           </div>
-        ))}
+        ) : (
+          <Image
+            src={`/api/image/${nft.tokenId}?v=wallet`}
+            alt={nft.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className={`
+              object-cover
+              transition-all
+              duration-500
+              ${
+                imageLoaded
+                  ? 'opacity-100 scale-100'
+                  : 'opacity-0 scale-105'
+              }
+              group-hover:scale-110
+            `}
+            onLoad={() => {
+              console.log(
+                `Image loaded successfully for token ${nft.tokenId}`
+              );
+              setImageLoaded(true);
+            }}
+            onError={(e) => {
+              console.error(
+                `Failed to load image for token ${nft.tokenId}:`,
+                e
+              );
+              setImageError(true);
+            }}
+            unoptimized
+          />
+        )}
+
+        {/* Image Overlay */}
+        <div
+          className="
+            pointer-events-none
+            absolute
+            inset-0
+            bg-gradient-to-br
+            from-cyan-400/5
+            via-transparent
+            to-pink-500/10
+            opacity-60
+          "
+        />
+
+        {/* Top Cyan Highlight */}
+        <div
+          className="
+            pointer-events-none
+            absolute
+            top-0
+            left-0
+            right-0
+            h-px
+            bg-gradient-to-r
+            from-transparent
+            via-cyan-300
+            to-transparent
+            opacity-60
+          "
+        />
+
+        {/* Bottom Pink Highlight */}
+        <div
+          className="
+            pointer-events-none
+            absolute
+            bottom-0
+            left-0
+            right-0
+            h-px
+            bg-gradient-to-r
+            from-transparent
+            via-pink-400
+            to-transparent
+            opacity-60
+          "
+        />
+
+        {/* Pin Type Badge */}
+        <div
+          className={`
+            absolute
+            top-2
+            right-2
+            px-2.5
+            py-1
+            rounded-lg
+            text-[10px]
+            font-bold
+            uppercase
+            tracking-wider
+            border
+            backdrop-blur-md
+            ${getLocationTypeStyle(locationType)}
+          `}
+        >
+          3 Word Pin
+        </div>
+
+        {/* Pin ID */}
+        <div
+          className="
+            absolute
+            bottom-2
+            left-2
+            bg-black/70
+            backdrop-blur-md
+            px-2.5
+            py-1
+            rounded-lg
+            text-xs
+            text-cyan-300
+            font-bold
+            border border-cyan-400/20
+          "
+        >
+          #{nft.tokenId}
+        </div>
       </div>
 
-      {/* Info text */}
-      <p className="text-xs text-gray-500 text-center mt-4">
-        These are random previews. Your actual NFTs will be different and generated at mint time.
-      </p>
+      {/* =========================================================
+          PIN INFORMATION
+      ========================================================== */}
+      <div className="relative z-10 space-y-4">
+
+        {/* Name / Description */}
+        <div>
+          <h3
+            className="
+              font-bold
+              text-white
+              text-lg
+              leading-tight
+              group-hover:text-cyan-300
+              transition-colors
+              duration-300
+            "
+          >
+            {nft.name}
+          </h3>
+
+          <p className="text-sm text-gray-400 line-clamp-2 mt-1.5 leading-relaxed">
+            {nft.description}
+          </p>
+        </div>
+
+        {/* Pin Identifier */}
+        <div
+          className="
+            rounded-xl
+            px-4
+            py-3
+            bg-gradient-to-r
+            from-cyan-400/[0.06]
+            via-white/[0.02]
+            to-pink-500/[0.06]
+            border border-white/10
+          "
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] text-gray-500 uppercase tracking-wider">
+              Location Identity
+            </span>
+
+            <span className="text-xs font-bold text-cyan-300">
+              3 WORD PIN
+            </span>
+          </div>
+
+          <div className="mt-2 text-sm font-semibold text-white">
+            /// KEEP.IT.SIMPLE
+          </div>
+        </div>
+
+        {/* Internal Score */}
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-gray-500">
+            Pin Score
+          </span>
+
+          <span
+            className="
+              text-sm
+              font-bold
+              bg-gradient-to-r
+              from-cyan-300
+              to-pink-400
+              bg-clip-text
+              text-transparent
+            "
+          >
+            {energyScore.toFixed(3)}
+          </span>
+        </div>
+
+        {/* =====================================================
+            ATTRIBUTES
+        ====================================================== */}
+        {nft.attributes && nft.attributes.length > 0 && (
+          <div className="space-y-2">
+
+            <div
+              className="
+                cursor-pointer
+                rounded-xl
+                border border-white/5
+                bg-white/[0.02]
+                p-3
+                hover:bg-white/[0.04]
+                transition-colors
+              "
+              onClick={() => setShowDetails(!showDetails)}
+            >
+              {nft.attributes
+                .slice(
+                  0,
+                  showDetails ? undefined : 2
+                )
+                .map((attr, index) => (
+                  <div
+                    key={index}
+                    className="
+                      flex
+                      justify-between
+                      items-center
+                      text-xs
+                      py-1
+                    "
+                  >
+                    <span className="text-gray-500">
+                      {attr.trait_type}
+                    </span>
+
+                    <span className="text-gray-300 font-medium text-right">
+                      {attr.value}
+                    </span>
+                  </div>
+                ))}
+
+              {nft.attributes.length > 2 && (
+                <div
+                  className="
+                    text-[10px]
+                    text-cyan-300
+                    text-center
+                    mt-2
+                    font-semibold
+                    uppercase
+                    tracking-wider
+                  "
+                >
+                  {showDetails
+                    ? '▲ Show Less'
+                    : `▼ +${nft.attributes.length - 2} More`}
+                </div>
+              )}
+            </div>
+
+          </div>
+        )}
+
+        {/* =====================================================
+            TRANSFER
+        ====================================================== */}
+        <button
+          type="button"
+          onClick={() => onTransfer(nft.tokenId)}
+          className="
+            group/button
+            relative
+            overflow-hidden
+            w-full
+            px-4
+            py-3
+            rounded-xl
+            font-bold
+            text-sm
+            text-black
+            bg-gradient-to-r
+            from-cyan-300
+            via-white
+            to-pink-400
+            transition-all
+            duration-300
+            hover:scale-[1.02]
+            hover:shadow-[0_0_30px_rgba(0,242,234,0.20)]
+          "
+        >
+          <span className="relative z-10">
+            Share / Transfer Pin
+          </span>
+
+          <span
+            className="
+              absolute
+              inset-0
+              bg-gradient-to-r
+              from-pink-400
+              via-white
+              to-cyan-300
+              opacity-0
+              group-hover/button:opacity-100
+              transition-opacity
+              duration-300
+            "
+          />
+        </button>
+
+      </div>
     </div>
   );
 }
