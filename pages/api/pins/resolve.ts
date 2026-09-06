@@ -1,10 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import {
   normalizeWordPin,
-  wordsToCoords,
+  isValidWordPin,
+  formatWordPin,
 } from "../../../lib/threeWordPin";
 
-export default async function handler(
+export default function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -14,34 +15,26 @@ export default async function handler(
     });
   }
 
-  try {
-    const { wordPin } = req.query;
+  const { wordPin } = req.query;
 
-    if (typeof wordPin !== "string") {
-      return res.status(400).json({
-        error: "wordPin is required",
-      });
-    }
-
-    const normalized = normalizeWordPin(wordPin);
-    const coords = wordsToCoords(normalized);
-
-    if (!coords) {
-      return res.status(404).json({
-        error: "Invalid 3WORDPIN",
-      });
-    }
-
-    return res.status(200).json({
-      wordPin: normalized,
-      latitude: coords.latitude,
-      longitude: coords.longitude,
-    });
-  } catch (error) {
-    console.error("PIN RESOLVE ERROR:", error);
-
-    return res.status(500).json({
-      error: "Unable to resolve 3WORDPIN",
+  if (typeof wordPin !== "string") {
+    return res.status(400).json({
+      error: "wordPin is required",
     });
   }
+
+  const normalized = normalizeWordPin(wordPin);
+
+  if (!isValidWordPin(normalized)) {
+    return res.status(400).json({
+      error: "Invalid 3WORDPIN format",
+      expected: "///word.word.word",
+    });
+  }
+
+  return res.status(200).json({
+    wordPin: normalized,
+    displayPin: formatWordPin(normalized),
+    valid: true,
+  });
 }
