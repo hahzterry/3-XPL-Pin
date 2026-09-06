@@ -1,27 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export default function Home() {
-  const [wordPin, setWordPin] = useState('');
+  const router = useRouter();
+  const [wordPin, setWordPin] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
 
     const normalized = wordPin
-      .replace(/^\/\/\//, '')
+      .replace(/^\/\/\//, "")
       .trim()
       .toLowerCase();
 
     if (!normalized) return;
 
-    window.location.href = `/p/${encodeURIComponent(normalized)}`;
+    router.push(`/p/${encodeURIComponent(normalized)}`);
   };
 
   return (
     <div className="min-h-screen bg-black text-white overflow-hidden">
-
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute top-[-300px] left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-cyan-500/10 rounded-full blur-[150px]" />
@@ -30,7 +31,7 @@ export default function Home() {
 
       <div className="relative z-10">
 
-        {/* Header */}
+        {/* HEADER */}
         <header className="border-b border-white/10 backdrop-blur-xl bg-black/40">
           <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
 
@@ -43,6 +44,7 @@ export default function Home() {
                 <div className="text-xl font-bold tracking-tight">
                   3WORDPIN
                 </div>
+
                 <div className="text-xs text-gray-500">
                   Find it. Share it. Book it.
                 </div>
@@ -50,15 +52,24 @@ export default function Home() {
             </Link>
 
             <nav className="hidden md:flex items-center gap-8 text-sm text-gray-400">
-              <a href="#how-it-works" className="hover:text-white transition">
+              <a
+                href="#how-it-works"
+                className="hover:text-white transition"
+              >
                 How It Works
               </a>
 
-              <a href="#marketplace" className="hover:text-white transition">
+              <a
+                href="#marketplace"
+                className="hover:text-white transition"
+              >
                 Marketplace
               </a>
 
-              <a href="#providers" className="hover:text-white transition">
+              <a
+                href="#providers"
+                className="hover:text-white transition"
+              >
                 List Something
               </a>
 
@@ -88,6 +99,7 @@ export default function Home() {
               <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.95]">
                 Every place.
                 <br />
+
                 <span className="bg-gradient-to-r from-cyan-300 via-white to-pink-400 bg-clip-text text-transparent">
                   Three words.
                 </span>
@@ -99,7 +111,7 @@ export default function Home() {
                 you want people to find.
               </p>
 
-              {/* Search */}
+              {/* SEARCH */}
               <form
                 onSubmit={handleSearch}
                 className="mt-10 max-w-2xl mx-auto"
@@ -136,7 +148,7 @@ export default function Home() {
 
             </div>
 
-            {/* Simple visual */}
+            {/* EXAMPLES */}
             <div className="mt-20 max-w-5xl mx-auto">
 
               <div className="relative rounded-3xl border border-white/10 bg-white/[0.03] p-6 md:p-10 overflow-hidden">
@@ -229,7 +241,10 @@ export default function Home() {
           </section>
 
           {/* MARKETPLACE */}
-          <section id="marketplace" className="max-w-6xl mx-auto px-6 py-24">
+          <section
+            id="marketplace"
+            className="max-w-6xl mx-auto px-6 py-24"
+          >
 
             <div className="grid lg:grid-cols-2 gap-16 items-center">
 
@@ -261,7 +276,7 @@ export default function Home() {
 
               </div>
 
-              <div className="relative">
+              <div>
 
                 <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8">
 
@@ -303,9 +318,12 @@ export default function Home() {
 
                   </div>
 
-                  <button className="mt-6 w-full py-4 rounded-xl bg-white text-black font-bold">
+                  <Link
+                    href="/explore"
+                    className="mt-6 block w-full py-4 rounded-xl bg-white text-black font-bold text-center"
+                  >
                     View Place
-                  </button>
+                  </Link>
 
                 </div>
 
@@ -315,7 +333,7 @@ export default function Home() {
 
           </section>
 
-          {/* TIKTOK DIFFERENTIATOR */}
+          {/* TIKTOK */}
           <section className="border-y border-white/10 bg-gradient-to-b from-pink-500/[0.04] to-transparent">
 
             <div className="max-w-6xl mx-auto px-6 py-24">
@@ -339,6 +357,7 @@ export default function Home() {
 
                 <div className="mt-10 inline-flex items-center gap-3 px-6 py-4 rounded-2xl border border-pink-400/20 bg-pink-400/5">
                   <span className="text-2xl">▶️</span>
+
                   <span className="font-semibold">
                     Watch. Decide. Book.
                   </span>
@@ -351,7 +370,10 @@ export default function Home() {
           </section>
 
           {/* PROVIDERS */}
-          <section id="providers" className="max-w-6xl mx-auto px-6 py-24">
+          <section
+            id="providers"
+            className="max-w-6xl mx-auto px-6 py-24"
+          >
 
             <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 md:p-16 text-center">
 
@@ -446,11 +468,6 @@ export default function Home() {
   );
 }
 
-
-/* ----------------------------- */
-/* Components                    */
-/* ----------------------------- */
-
 function ExampleCard({
   pin,
   icon,
@@ -484,7 +501,6 @@ function ExampleCard({
     </div>
   );
 }
-
 
 function Step({
   number,
@@ -524,7 +540,6 @@ function Step({
   );
 }
 
-
 function Feature({
   icon,
   text,
@@ -546,7 +561,6 @@ function Feature({
     </div>
   );
 }
-
 
 function MiniCard({
   icon,
