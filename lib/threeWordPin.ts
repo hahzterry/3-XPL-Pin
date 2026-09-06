@@ -15,7 +15,5 @@ export function isValidWordPin(value: string): boolean {
 }
 
 export function formatWordPin(value: string): string {
-  const normalized = normalizeWordPin(value);
-
-  return `///${normalized}`;
+  return `///${normalizeWordPin(value)}`;
 }
