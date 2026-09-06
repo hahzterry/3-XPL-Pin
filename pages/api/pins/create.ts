@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { supabase } from "../../../lib/supabase";
 import {
   normalizeWordPin,
-  wordsToCoords,
+  isValidWordPin,
 } from "../../../lib/threeWordPin";
 
 export default async function handler(
@@ -31,11 +31,11 @@ export default async function handler(
     }
 
     const normalized = normalizeWordPin(wordPin);
-    const coords = wordsToCoords(normalized);
 
-    if (!coords) {
+    if (!isValidWordPin(normalized)) {
       return res.status(400).json({
-        error: "Invalid 3WORDPIN",
+        error: "Invalid 3WORDPIN format",
+        expected: "///word.word.word",
       });
     }
 
@@ -44,8 +44,6 @@ export default async function handler(
       .upsert(
         {
           word_pin: normalized,
-          latitude: coords.latitude,
-          longitude: coords.longitude,
           address: address || null,
           city: city || null,
           state: state || null,
@@ -59,7 +57,7 @@ export default async function handler(
       .single();
 
     if (error) {
-      console.error(error);
+      console.error("SUPABASE LOCATION ERROR:", error);
 
       return res.status(500).json({
         error: error.message,
