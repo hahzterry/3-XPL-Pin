@@ -1,987 +1,1047 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import AnimatedBackground from '@/components/AnimatedBackground';
+import { FormEvent, useEffect, useState } from "react";
+import { useAccount } from "wagmi";
+import { useRouter } from "next/navigation";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import AnimatedBackground from "@/components/AnimatedBackground";
 
-// Admin addresses (you can add more)
+// Admin addresses
 const ADMIN_ADDRESSES = [
-  '0x36d7885524c591eda18Cf678b49a09772E89dB5c', // Your admin address
-].map(addr => addr.toLowerCase());
+  "0x36d7885524c591eda18Cf678b49a09772E89dB5c",
+].map((address) => address.toLowerCase());
+
+type Tab = "deploy" | "submit" | "admin";
+
+interface Submission {
+  id: string;
+  contractAddress: string;
+  collectionName: string;
+  creatorName: string;
+  websiteUrl?: string;
+  description?: string;
+  xProfile?: string;
+  discord?: string;
+  pinAddress?: string;
+  status: string;
+  createdAt?: string;
+}
+
+interface DeployedCollection {
+  id?: string;
+  contractAddress: string;
+  collectionName?: string;
+  creatorName?: string;
+  pinAddress?: string;
+  approved?: boolean;
+}
+
+function normalizePin(value: string): string {
+  let decoded = value.trim();
+
+  try {
+    decoded = decodeURIComponent(decoded);
+  } catch {
+    // Keep original value if decoding fails.
+  }
+
+  return decoded
+    .replace(/^\/{3}/, "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "");
+}
+
+function isValidPin(value: string): boolean {
+  const normalized = normalizePin(value);
+  const words = normalized.split(".");
+
+  return (
+    words.length === 3 &&
+    words.every(
+      (word) => word.length > 0 && /^[a-z0-9-]+$/.test(word)
+    )
+  );
+}
+
+function formatPin(value?: string): string {
+  if (!value) return "";
+  return `///${normalizePin(value)}`;
+}
 
 export default function CreatePage() {
-  const { address } = useAccount();
-  const [activeTab, setActiveTab] = useState<'deploy' | 'submit' | 'admin'>('deploy');
-  const isAdmin = address && ADMIN_ADDRESSES.includes(address.toLowerCase());
-  
-  // Submission form state
-  const [contractAddress, setContractAddress] = useState('');
-  const [collectionName, setCollectionName] = useState('');
-  const [creatorName, setCreatorName] = useState('');
-  const [websiteUrl, setWebsiteUrl] = useState('');
-  const [description, setDescription] = useState('');
-  const [xProfile, setXProfile] = useState('');
-  const [discord, setDiscord] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState('');
-  
-  // Admin panel state
-  const [submissions, setSubmissions] = useState<any[]>([]);
-  const [isLoadingSubmissions, setIsLoadingSubmissions] = useState(false);
+  const router = useRouter();
+  const { address, isConnected } = useAccount();
+
+  const isAdmin =
+    !!address && ADMIN_ADDRESSES.includes(address.toLowerCase());
+
+  const [activeTab, setActiveTab] = useState<Tab>("deploy");
+
+  // Shared 3 Word Pin
+  const [pinAddress, setPinAddress] = useState("");
+  const [pinError, setPinError] = useState("");
+
+  // Submission form
+  const [contractAddress, setContractAddress] = useState("");
+  const [collectionName, setCollectionName] = useState("");
+  const [creatorName, setCreatorName] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [description, setDescription] = useState("");
+  const [xProfile, setXProfile] = useState("");
+  const [discord, setDiscord] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [message, setMessage] = useState("");
+
+  // Admin
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
   const [reviewingId, setReviewingId] = useState<string | null>(null);
-  
-  // Deployed collections state
-  const [deployedCollections, setDeployedCollections] = useState<any[]>([]);
-  const [isLoadingCollections, setIsLoadingCollections] = useState(false);
-  const [approvingAddress, setApprovingAddress] = useState<string | null>(null);
-  const [adminView, setAdminView] = useState<'submissions' | 'deployed'>('submissions');
-  
-  // Load submissions for admin
+
+  const [deployedCollections, setDeployedCollections] = useState<
+    DeployedCollection[]
+  >([]);
+  const [loadingCollections, setLoadingCollections] = useState(false);
+  const [approvingAddress, setApprovingAddress] = useState<string | null>(
+    null
+  );
+  const [adminView, setAdminView] = useState<"submissions" | "collections">(
+    "submissions"
+  );
+
   useEffect(() => {
-    if (isAdmin && activeTab === 'admin') {
-      if (adminView === 'submissions') {
-        loadSubmissions();
-      } else {
-        loadDeployedCollections();
-      }
+    if (isAdmin && activeTab === "admin") {
+      loadAdminData();
     }
-  }, [isAdmin, activeTab, adminView]);
-  
-  const loadSubmissions = async () => {
-    setIsLoadingSubmissions(true);
-    try {
-      const response = await fetch('/api/submissions/get-submissions?status=pending');
-      const data = await response.json();
-      if (data.success) {
-        setSubmissions(data.submissions);
-      }
-    } catch (error) {
-      console.error('Error loading submissions:', error);
-    } finally {
-      setIsLoadingSubmissions(false);
+  }, [isAdmin, activeTab]);
+
+  function handlePinChange(value: string) {
+    setPinAddress(value);
+    setPinError("");
+
+    if (!value.trim()) return;
+
+    if (!isValidPin(value)) {
+      setPinError(
+        "Enter exactly 3 words separated by periods. Example: ///house.blue.atlanta"
+      );
     }
-  };
-  
-  const loadDeployedCollections = async () => {
-    setIsLoadingCollections(true);
-    try {
-      const response = await fetch('/api/submissions/get-unapproved-collections');
-      const data = await response.json();
-      if (data.success) {
-        setDeployedCollections(data.collections);
-      }
-    } catch (error) {
-      console.error('Error loading deployed collections:', error);
-    } finally {
-      setIsLoadingCollections(false);
+  }
+
+  function validatePin(): string | null {
+    const normalized = normalizePin(pinAddress);
+
+    if (!normalized) {
+      setPinError(
+        "A 3 Word Pin address is required. Example: ///house.blue.atlanta"
+      );
+      return null;
     }
-  };
-  
-  const handleSubmit = async (e: React.FormEvent) => {
+
+    if (!isValidPin(normalized)) {
+      setPinError(
+        "Use exactly 3 words separated by periods. Example: ///house.blue.atlanta"
+      );
+      return null;
+    }
+
+    setPinError("");
+    return normalized;
+  }
+
+  function launchBuilder() {
+    const normalized = validatePin();
+
+    if (!normalized) return;
+
+    router.push(
+      `/create/builder?pin=${encodeURIComponent(normalized)}`
+    );
+  }
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    
-    if (!address) {
-      setSubmitMessage('❌ Please connect your wallet first');
+
+    setMessage("");
+
+    const normalizedPin = validatePin();
+
+    if (!normalizedPin) {
       return;
     }
-    
-    if (!contractAddress || !collectionName || !creatorName || !description) {
-      setSubmitMessage('❌ Please fill in all required fields');
+
+    if (!contractAddress.trim()) {
+      setMessage("Contract address is required.");
       return;
     }
-    
-    setIsSubmitting(true);
-    setSubmitMessage('Submitting your collection...');
-    
+
+    if (!collectionName.trim()) {
+      setMessage("Collection name is required.");
+      return;
+    }
+
+    if (!creatorName.trim()) {
+      setMessage("Creator name is required.");
+      return;
+    }
+
+    setSubmitting(true);
+
     try {
-      const response = await fetch('/api/submissions/submit-collection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contractAddress,
-          collectionName,
-          creatorName,
-          websiteUrl,
-          description,
-          submitterAddress: address,
-          xProfile,
-          discord
-        })
-      });
-      
+      const response = await fetch(
+        "/api/submissions/submit-collection",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contractAddress: contractAddress.trim(),
+            collectionName: collectionName.trim(),
+            creatorName: creatorName.trim(),
+            websiteUrl: websiteUrl.trim(),
+            description: description.trim(),
+            xProfile: xProfile.trim(),
+            discord: discord.trim(),
+            pinAddress: normalizedPin,
+            walletAddress: address,
+          }),
+        }
+      );
+
       const data = await response.json();
-      
-      if (data.success) {
-        setSubmitMessage('✅ ' + data.message);
-        // Reset form
-        setContractAddress('');
-        setCollectionName('');
-        setCreatorName('');
-        setWebsiteUrl('');
-        setDescription('');
-        setXProfile('');
-        setDiscord('');
-      } else {
-        setSubmitMessage('❌ ' + (data.error || 'Submission failed'));
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Failed to submit collection."
+        );
       }
+
+      setMessage(
+        "Collection submitted successfully for verification."
+      );
+
+      setContractAddress("");
+      setCollectionName("");
+      setCreatorName("");
+      setWebsiteUrl("");
+      setDescription("");
+      setXProfile("");
+      setDiscord("");
+      setPinAddress("");
     } catch (error) {
-      console.error('Error submitting:', error);
-      setSubmitMessage('❌ Failed to submit collection. Please try again.');
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Something went wrong."
+      );
     } finally {
-      setIsSubmitting(false);
+      setSubmitting(false);
     }
-  };
-  
-  const handleReview = async (submissionId: string, action: 'approve' | 'deny', contractType: string = 'basic') => {
-    if (!address) return;
-    
-    setReviewingId(submissionId);
-    
+  }
+
+  async function loadAdminData() {
+    await Promise.all([
+      loadSubmissions(),
+      loadDeployedCollections(),
+    ]);
+  }
+
+  async function loadSubmissions() {
+    setLoadingSubmissions(true);
+
     try {
-      const response = await fetch('/api/submissions/review-submission', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          submissionId,
-          action,
-          reviewerAddress: address,
-          contractType,
-          isFeatured: false
-        })
-      });
-      
+      const response = await fetch(
+        "/api/submissions/get-submissions?status=pending"
+      );
+
       const data = await response.json();
-      
-      if (data.success) {
-        alert(data.message);
-        // Reload submissions
-        loadSubmissions();
-      } else {
-        alert('Error: ' + (data.error || 'Review failed'));
+
+      if (response.ok) {
+        setSubmissions(data.submissions || data || []);
       }
     } catch (error) {
-      console.error('Error reviewing submission:', error);
-      alert('Failed to review submission');
+      console.error("Failed to load submissions:", error);
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  }
+
+  async function loadDeployedCollections() {
+    setLoadingCollections(true);
+
+    try {
+      const response = await fetch(
+        "/api/submissions/get-unapproved-collections"
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setDeployedCollections(
+          data.collections || data || []
+        );
+      }
+    } catch (error) {
+      console.error(
+        "Failed to load deployed collections:",
+        error
+      );
+    } finally {
+      setLoadingCollections(false);
+    }
+  }
+
+  async function reviewSubmission(
+    id: string,
+    decision: "approve" | "deny"
+  ) {
+    setReviewingId(id);
+
+    try {
+      const response = await fetch(
+        "/api/submissions/review-submission",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            submissionId: id,
+            decision,
+            adminAddress: address,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Failed to review submission."
+        );
+      }
+
+      await loadSubmissions();
+    } catch (error) {
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to review submission."
+      );
     } finally {
       setReviewingId(null);
     }
-  };
-  
-  const handleApproveCollection = async (contractAddress: string) => {
-    if (!address) return;
-    
-    if (!confirm('Approve and feature this collection? It will be highlighted on the explore page!')) {
-      return;
-    }
-    
-    setApprovingAddress(contractAddress);
-    
+  }
+
+  async function approveCollection(
+    collectionAddress: string
+  ) {
+    setApprovingAddress(collectionAddress);
+
     try {
-      const response = await fetch('/api/submissions/approve-collection', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contractAddress,
-          adminAddress: address
-        })
-      });
-      
+      const response = await fetch(
+        "/api/submissions/approve-collection",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contractAddress: collectionAddress,
+            adminAddress: address,
+          }),
+        }
+      );
+
       const data = await response.json();
-      
-      if (data.success) {
-        alert('✅ Collection approved and featured!');
-        // Reload deployed collections
-        loadDeployedCollections();
-      } else {
-        alert('Error: ' + (data.error || 'Approval failed'));
+
+      if (!response.ok) {
+        throw new Error(
+          data?.error || "Failed to approve collection."
+        );
       }
+
+      await loadDeployedCollections();
     } catch (error) {
-      console.error('Error approving collection:', error);
-      alert('Failed to approve collection');
+      console.error(error);
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Failed to approve collection."
+      );
     } finally {
       setApprovingAddress(null);
     }
-  };
+  }
+
+  const inputClass =
+    "w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-white placeholder:text-white/30 outline-none transition focus:border-cyan-400/60 focus:bg-white/[0.07] focus:ring-2 focus:ring-cyan-400/10";
+
+  const cardClass =
+    "rounded-3xl border border-white/10 bg-white/[0.035] backdrop-blur-xl shadow-[0_0_60px_rgba(0,242,234,0.04)]";
+
+  const gradientText =
+    "bg-gradient-to-r from-cyan-300 via-white to-pink-400 bg-clip-text text-transparent";
 
   return (
-    <div className="min-h-screen bg-black text-white relative overflow-hidden">
-      <AnimatedBackground />
-      
+    <div className="min-h-screen overflow-hidden bg-black text-white">
+      {/* Landing-page style ambient lighting */}
+      <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="absolute left-1/2 top-[-300px] h-[700px] w-[700px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-[150px]" />
+        <div className="absolute bottom-[-300px] right-[-200px] h-[650px] w-[650px] rounded-full bg-pink-500/10 blur-[160px]" />
+        <div className="absolute left-[-250px] top-[45%] h-[500px] w-[500px] rounded-full bg-cyan-400/5 blur-[140px]" />
+      </div>
+
       <div className="relative z-10">
         <Header />
-        
-        <main className="container mx-auto px-6 py-12">
-          {/* Hero Section */}
-          <div className="text-center mb-16">
-            <h1 className="text-5xl md:text-7xl font-bold mb-6 plasma-gradient-text">
-              Create & Deploy
-            </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Launch your own NFT collection on Plasma network or submit your existing collection for verification
-            </p>
-          </div>
 
-          {/* Tab Navigation */}
-          <div className="flex justify-center mb-12">
-            <div className="glass-card p-2 inline-flex rounded-xl">
-              <button
-                onClick={() => setActiveTab('deploy')}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === 'deploy'
-                    ? 'bg-forest-500/30 text-forest-300 shadow-lg'
-                    : 'text-gray-400 hover:text-gray-300'
-                }`}
-              >
-                Deploy Collection
-              </button>
-              <button
-                onClick={() => setActiveTab('submit')}
-                className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                  activeTab === 'submit'
-                    ? 'bg-forest-500/30 text-forest-300 shadow-lg'
-                    : 'text-gray-400 hover:text-gray-300'
-                }`}
-              >
-                Submit for Verification
-              </button>
-              {isAdmin && (
-                <button
-                  onClick={() => setActiveTab('admin')}
-                  className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
-                    activeTab === 'admin'
-                      ? 'bg-forest-500/30 text-forest-300 shadow-lg'
-                      : 'text-gray-400 hover:text-gray-300'
-                  }`}
-                >
-                  Admin Panel
-                  {submissions.length > 0 && (
-                    <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
-                      {submissions.length}
-                    </span>
-                  )}
-                </button>
-              )}
+        <main className="mx-auto max-w-7xl px-5 pb-24 pt-10 sm:px-8">
+          {/* Hero */}
+          <section className="mx-auto max-w-4xl text-center">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/5 px-4 py-2 text-xs font-semibold tracking-[0.2em] text-cyan-300 uppercase">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-cyan-300" />
+              3WORDPIN CREATOR HUB
             </div>
+
+            <h1 className="text-5xl font-black tracking-tight sm:text-7xl">
+              Create.
+              <br />
+              <span className={gradientText}>
+                Deploy. Pin.
+              </span>
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/55 sm:text-lg">
+              Create your collection, deploy on Gen-Plasma, and
+              connect it to a human-readable 3 Word Pin address.
+            </p>
+          </section>
+
+          {/* Navigation tabs */}
+          <div className="mx-auto mt-12 flex max-w-4xl flex-wrap justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.025] p-2 backdrop-blur-xl">
+            <button
+              type="button"
+              onClick={() => setActiveTab("deploy")}
+              className={`rounded-xl px-5 py-3 text-sm font-bold transition ${
+                activeTab === "deploy"
+                  ? "border border-cyan-400/20 bg-cyan-400/10 text-cyan-300 shadow-[0_0_25px_rgba(0,242,234,0.08)]"
+                  : "text-white/45 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              Create & Deploy
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("submit")}
+              className={`rounded-xl px-5 py-3 text-sm font-bold transition ${
+                activeTab === "submit"
+                  ? "border border-pink-400/20 bg-pink-400/10 text-pink-300 shadow-[0_0_25px_rgba(255,0,80,0.08)]"
+                  : "text-white/45 hover:bg-white/5 hover:text-white"
+              }`}
+            >
+              Submit Collection
+            </button>
+
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => setActiveTab("admin")}
+                className={`rounded-xl px-5 py-3 text-sm font-bold transition ${
+                  activeTab === "admin"
+                    ? "border border-white/20 bg-white/10 text-white"
+                    : "text-white/45 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                Admin
+              </button>
+            )}
           </div>
 
-          {/* Deploy Collection Tab */}
-          {activeTab === 'deploy' && (
-            <div className="max-w-4xl mx-auto">
-              <div className="glass-card p-8 mb-8">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold mb-4 text-white">Deploy Your NFT Collection</h2>
-                  <p className="text-gray-400">Launch your own customizable NFT collection on the Plasma network</p>
-                </div>
-
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  {/* Features */}
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-semibold text-forest-300 mb-4">Collection Features</h3>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">ERC-721 Standard</h4>
-                          <p className="text-sm text-gray-400">Fully compatible with all major marketplaces</p>
-                        </div>
+          {/* CREATE / DEPLOY */}
+          {activeTab === "deploy" && (
+            <section className="mx-auto mt-10 max-w-5xl">
+              <div className={`${cardClass} overflow-hidden`}>
+                <div className="border-b border-white/10 p-7 sm:p-10">
+                  <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <div className="mb-3 text-sm font-bold tracking-[0.15em] text-cyan-300 uppercase">
+                        Builder
                       </div>
 
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">Custom Metadata</h4>
-                          <p className="text-sm text-gray-400">Rich attributes and properties support</p>
-                        </div>
-                      </div>
+                      <h2 className="text-3xl font-black sm:text-4xl">
+                        Create & Deploy
+                      </h2>
 
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">Low Gas Fees</h4>
-                          <p className="text-sm text-gray-400">Deploy and mint on Plasma network</p>
-                        </div>
-                      </div>
+                      <p className="mt-3 max-w-2xl text-white/50">
+                        Build an NFT collection with low-cost
+                        deployment on Gen-Plasma.
+                      </p>
+                    </div>
 
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">Multiple Contract Types</h4>
-                          <p className="text-sm text-gray-400">Basic, Editions, and Pro collections</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">Royalty Support</h4>
-                          <p className="text-sm text-gray-400">Built-in creator royalties (EIP-2981)</p>
-                        </div>
-                      </div>
+                    <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/5 px-4 py-3 text-sm text-cyan-200">
+                      ERC-721
                     </div>
                   </div>
+                </div>
 
-                  {/* Launch Button & Special Offer */}
-                  <div className="space-y-4">
-                    <h3 className="text-xl font-semibold text-forest-300 mb-4">Get Started</h3>
-                    
-                    {/* Launch Button */}
-                    <div className="text-center">
-                      <a href="/create/builder">
-                        <button className="w-full px-6 py-4 bg-gradient-to-r from-forest-500 to-forest-600 hover:from-forest-600 hover:to-forest-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
-                          Launch Collection Builder
-                        </button>
-                      </a>
-                      <p className="text-xs text-gray-500 mt-2">
-                        Professional no-code deployment tool
-                      </p>
+                <div className="space-y-8 p-7 sm:p-10">
+                  {/* 3 WORD PIN */}
+                  <div>
+                    <label className="mb-2 block text-sm font-bold text-white">
+                      3 Word Pin Address
+                    </label>
+
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-cyan-300">
+                        ///
+                      </span>
+
+                      <input
+                        value={normalizePin(pinAddress)}
+                        onChange={(e) =>
+                          handlePinChange(e.target.value)
+                        }
+                        placeholder="house.blue.atlanta"
+                        className={`${inputClass} pl-12`}
+                      />
                     </div>
-                    
-                    {/* Holder Discount */}
-                    <div className="glass-card p-4 border border-yellow-500/30 bg-gradient-to-br from-yellow-500/5 to-orange-500/5">
-                      <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-white">Holder Exclusive</h4>
-                        <div className="text-right">
-                          <span className="text-yellow-300 font-bold text-lg">50% OFF</span>
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-400 mb-3">
-                        Gen-Plasma holders get half-price on all deployments!
+
+                    {pinError && (
+                      <p className="mt-2 text-sm text-pink-400">
+                        {pinError}
                       </p>
-                      <div className="bg-black/30 rounded p-2 mb-2">
-                        <div className="text-xs text-gray-500 mb-0.5">Contract:</div>
-                        <div className="font-mono text-yellow-300 text-xs break-all">
-                          0xB10d...4D08
+                    )}
+
+                    <p className="mt-2 text-xs text-white/35">
+                      Example: ///house.blue.atlanta — this becomes
+                      the human-readable address for your collection.
+                    </p>
+                  </div>
+
+                  {/* Feature grid */}
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {[
+                      {
+                        title: "Low Gas",
+                        text: "Deploy with dramatically lower transaction costs.",
+                        icon: "⚡",
+                      },
+                      {
+                        title: "ERC-721",
+                        text: "Launch standard NFT collections with flexible metadata.",
+                        icon: "◇",
+                      },
+                      {
+                        title: "Royalties",
+                        text: "Configure creator royalties for secondary sales.",
+                        icon: "↗",
+                      },
+                      {
+                        title: "3WORDPIN",
+                        text: "Give your collection a memorable 3-word location.",
+                        icon: "⌖",
+                      },
+                    ].map((feature) => (
+                      <div
+                        key={feature.title}
+                        className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"
+                      >
+                        <div className="mb-4 text-2xl">
+                          {feature.icon}
                         </div>
+
+                        <h3 className="font-bold">
+                          {feature.title}
+                        </h3>
+
+                        <p className="mt-2 text-sm leading-6 text-white/40">
+                          {feature.text}
+                        </p>
                       </div>
-                      <div className="text-xs text-yellow-300/80">
-                        ✨ Auto-applied
-                      </div>
-                    </div>
+                    ))}
                   </div>
 
                   {/* Pricing */}
-                  <div className="space-y-4 md:col-span-2">
-                    <h3 className="text-xl font-semibold text-forest-300 mb-4">Deployment Options</h3>
-                    
-                    <div className="space-y-4">
-                      <div className="glass-card p-4 border border-forest-500/20">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-semibold text-white">Basic Collection</h4>
-                          <div className="text-right">
-                            <span className="text-forest-300 font-bold text-lg">18 XPL</span>
-                            <div className="text-xs text-green-400">Launch Promo</div>
-                          </div>
-                        </div>
-                        <ul className="text-sm text-gray-400 space-y-1">
-                          <li>• Standard ERC-721 contract</li>
-                          <li>• Up to 1,000 tokens</li>
-                          <li>• Custom mint page</li>
-                          <li>• Community support</li>
-                        </ul>
-                      </div>
+                  <div className="rounded-3xl border border-white/10 bg-black/30 p-6">
+                    <div className="mb-5 flex items-center justify-between">
+                      <h3 className="font-bold">
+                        Launch Options
+                      </h3>
 
-                      <div className="glass-card p-4 border border-purple-500/30">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-semibold text-white">Editions Collection</h4>
-                          <div className="text-right">
-                            <span className="text-purple-300 font-bold text-lg">22 XPL</span>
-                            <div className="text-xs text-green-400">Launch Promo</div>
-                          </div>
-                        </div>
-                        <ul className="text-sm text-gray-400 space-y-1">
-                          <li>• Single artwork, multiple copies</li>
-                          <li>• Up to 1,000 editions</li>
-                          <li>• Merkle tree whitelist support</li>
-                          <li>• Time-based scheduling</li>
-                          <li>• Perfect for digital art</li>
-                        </ul>
-                        <div className="mt-3">
-                          <span className="text-xs bg-purple-500/20 text-purple-300 px-2 py-1 rounded-full">
-                            Popular
-                          </span>
-                        </div>
-                      </div>
+                      <span className="text-xs text-white/35">
+                        XPL
+                      </span>
+                    </div>
 
-                      <div className="glass-card p-4 border border-forest-400/40">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-semibold text-white">Pro Collection</h4>
-                          <div className="text-right">
-                            <span className="text-forest-300 font-bold text-lg">35 XPL</span>
-                            <div className="text-xs text-green-400">Launch Promo</div>
+                    <div className="grid gap-3 sm:grid-cols-3">
+                      {[
+                        {
+                          price: "18",
+                          title: "Starter",
+                          text: "Simple collection launch",
+                        },
+                        {
+                          price: "22",
+                          title: "Creator",
+                          text: "Advanced metadata tools",
+                        },
+                        {
+                          price: "35",
+                          title: "Pro",
+                          text: "Full creator experience",
+                        },
+                      ].map((plan) => (
+                        <div
+                          key={plan.title}
+                          className="rounded-2xl border border-white/10 bg-white/[0.025] p-5"
+                        >
+                          <div className="text-2xl font-black">
+                            {plan.price}{" "}
+                            <span className="text-sm text-cyan-300">
+                              XPL
+                            </span>
+                          </div>
+
+                          <div className="mt-2 font-bold">
+                            {plan.title}
+                          </div>
+
+                          <div className="mt-1 text-xs text-white/35">
+                            {plan.text}
                           </div>
                         </div>
-                        <ul className="text-sm text-gray-400 space-y-1">
-                          <li>• Advanced contract features</li>
-                          <li>• Up to 10,000 tokens</li>
-                          <li>• Merkle tree whitelist support</li>
-                          <li>• Royalty management (EIP-2981)</li>
-                          <li>• Time-based scheduling</li>
-                          <li>• Custom mint page</li>
-                          <li>• Priority verification</li>
-                        </ul>
-                        <div className="mt-3">
-                          <span className="text-xs bg-forest-500/20 text-forest-300 px-2 py-1 rounded-full">
-                            Recommended
-                          </span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
+
+                  {/* Holder discount */}
+                  <div className="rounded-2xl border border-pink-400/15 bg-pink-400/[0.04] p-5">
+                    <div className="font-bold text-pink-300">
+                      Holder Discount
+                    </div>
+
+                    <p className="mt-1 text-sm text-white/45">
+                      Eligible 3WORDPIN holders may receive
+                      discounted creator tools and launch fees.
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={launchBuilder}
+                    className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 via-cyan-300 to-pink-500 px-6 py-4 font-black text-black shadow-[0_0_40px_rgba(0,242,234,0.12)] transition hover:scale-[1.01] hover:shadow-[0_0_55px_rgba(255,0,80,0.15)]"
+                  >
+                    Continue to Collection Builder →
+                  </button>
                 </div>
               </div>
-            </div>
+
+              {/* Developer resources */}
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <a
+                  href="https://docs.plasma.to"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${cardClass} group p-6 transition hover:border-cyan-400/20`}
+                >
+                  <div className="text-xs font-bold tracking-widest text-cyan-300 uppercase">
+                    Documentation
+                  </div>
+
+                  <div className="mt-2 text-xl font-black">
+                    Plasma Docs ↗
+                  </div>
+
+                  <p className="mt-2 text-sm text-white/40">
+                    Explore the Gen-Plasma developer documentation.
+                  </p>
+                </a>
+
+                <a
+                  href="https://github.com/plasma-network"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`${cardClass} group p-6 transition hover:border-pink-400/20`}
+                >
+                  <div className="text-xs font-bold tracking-widest text-pink-300 uppercase">
+                    Open Source
+                  </div>
+
+                  <div className="mt-2 text-xl font-black">
+                    Plasma GitHub ↗
+                  </div>
+
+                  <p className="mt-2 text-sm text-white/40">
+                    Explore Plasma Network developer resources.
+                  </p>
+                </a>
+              </div>
+            </section>
           )}
 
-          {/* Submit for Verification Tab */}
-          {activeTab === 'submit' && (
-            <div className="max-w-4xl mx-auto">
-              <div className="glass-card p-8 mb-8">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold mb-4 text-white">Submit Collection for Verification</h2>
-                  <p className="text-gray-400">Get your existing NFT collection verified and featured in our ecosystem</p>
+          {/* SUBMIT */}
+          {activeTab === "submit" && (
+            <section className="mx-auto mt-10 max-w-5xl">
+              <div className={`${cardClass} p-7 sm:p-10`}>
+                <div className="mb-10">
+                  <div className="mb-3 text-sm font-bold tracking-[0.15em] text-pink-300 uppercase">
+                    Verification
+                  </div>
+
+                  <h2 className="text-3xl font-black sm:text-4xl">
+                    Submit Your Collection
+                  </h2>
+
+                  <p className="mt-3 max-w-2xl text-white/50">
+                    Already deployed a collection? Submit it for
+                    verification and connect it to a 3 Word Pin.
+                  </p>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-8 mb-8">
-                  {/* Requirements */}
-                  <div className="space-y-6">
-                    <h3 className="text-xl font-semibold text-forest-300 mb-4">Verification Requirements</h3>
-                    
-                    <div className="space-y-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">Contract Verification</h4>
-                          <p className="text-sm text-gray-400">Source code verified on Plasmascan</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">Creator Identity</h4>
-                          <p className="text-sm text-gray-400">Verified social media or website</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">Quality Standards</h4>
-                          <p className="text-sm text-gray-400">Original artwork and proper metadata</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-forest-500/20 rounded-full flex items-center justify-center mt-0.5">
-                          <svg className="w-3 h-3 text-forest-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-white">Community Value</h4>
-                          <p className="text-sm text-gray-400">Active community or artistic merit</p>
-                        </div>
+                {/* Requirements */}
+                <div className="mb-8 grid gap-3 sm:grid-cols-3">
+                  {[
+                    "Valid contract",
+                    "Creator information",
+                    "3 Word Pin address",
+                  ].map((item, index) => (
+                    <div
+                      key={item}
+                      className="rounded-2xl border border-white/10 bg-white/[0.025] p-4"
+                    >
+                      <div className="text-sm font-bold">
+                        <span className="mr-2 text-cyan-300">
+                          0{index + 1}
+                        </span>
+                        {item}
                       </div>
                     </div>
-                  </div>
-
-                  {/* Benefits */}
-                  <div className="space-y-6">
-                    <h3 className="text-xl font-semibold text-forest-300 mb-4">Verification Benefits</h3>
-                    
-                    <div className="space-y-4">
-                      <div className="glass-card p-4 border border-forest-500/20">
-                        <h4 className="font-semibold text-white mb-2">🔹 Verified Badge</h4>
-                        <p className="text-sm text-gray-400">Green checkmark displayed across the platform</p>
-                      </div>
-
-                      <div className="glass-card p-4 border border-forest-500/20">
-                        <h4 className="font-semibold text-white mb-2">🔹 Featured Listings</h4>
-                        <p className="text-sm text-gray-400">Priority placement in collection browser</p>
-                      </div>
-
-                      <div className="glass-card p-4 border border-forest-500/20">
-                        <h4 className="font-semibold text-white mb-2">🔹 Wallet Integration</h4>
-                        <p className="text-sm text-gray-400">Automatic detection in user wallets</p>
-                      </div>
-
-                      <div className="glass-card p-4 border border-forest-500/20">
-                        <h4 className="font-semibold text-white mb-2">🔹 Analytics Dashboard</h4>
-                        <p className="text-sm text-gray-400">Detailed collection metrics and insights</p>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
 
-                {/* Submission Form */}
-                <form onSubmit={handleSubmit} className="border-t border-white/10 pt-8">
-                  <h3 className="text-xl font-semibold text-white mb-6">Submit Your Collection</h3>
-                  
-                  <div className="grid md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Contract Address *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="0x..."
-                        value={contractAddress}
-                        onChange={(e) => setContractAddress(e.target.value)}
-                        className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-forest-500/50 focus:ring-1 focus:ring-forest-500/20 transition-colors"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Collection Name *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Your Collection Name"
-                        value={collectionName}
-                        onChange={(e) => setCollectionName(e.target.value)}
-                        className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-forest-500/50 focus:ring-1 focus:ring-forest-500/20 transition-colors"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Creator/Artist Name *
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Your name or artist name"
-                        value={creatorName}
-                        onChange={(e) => setCreatorName(e.target.value)}
-                        className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-forest-500/50 focus:ring-1 focus:ring-forest-500/20 transition-colors"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Website
-                      </label>
-                      <input
-                        type="url"
-                        placeholder="https://..."
-                        value={websiteUrl}
-                        onChange={(e) => setWebsiteUrl(e.target.value)}
-                        className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-forest-500/50 focus:ring-1 focus:ring-forest-500/20 transition-colors"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        X Profile
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="@username"
-                        value={xProfile}
-                        onChange={(e) => setXProfile(e.target.value)}
-                        className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-forest-500/50 focus:ring-1 focus:ring-forest-500/20 transition-colors"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">
-                        Discord
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="discord.gg/..."
-                        value={discord}
-                        onChange={(e) => setDiscord(e.target.value)}
-                        className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-forest-500/50 focus:ring-1 focus:ring-forest-500/20 transition-colors"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-6">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">
-                      Collection Description *
+                <form
+                  onSubmit={handleSubmit}
+                  className="space-y-6"
+                >
+                  {/* Pin */}
+                  <div>
+                    <label className="mb-2 block text-sm font-bold">
+                      3 Word Pin Address *
                     </label>
-                    <textarea
-                      rows={4}
-                      placeholder="Describe your collection, its story, and what makes it unique..."
-                      value={description}
-                      onChange={(e) => setDescription(e.target.value)}
-                      className="w-full p-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-forest-500/50 focus:ring-1 focus:ring-forest-500/20 transition-colors resize-none"
+
+                    <div className="relative">
+                      <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-bold text-cyan-300">
+                        ///
+                      </span>
+
+                      <input
+                        value={normalizePin(pinAddress)}
+                        onChange={(e) =>
+                          handlePinChange(e.target.value)
+                        }
+                        placeholder="house.blue.atlanta"
+                        className={`${inputClass} pl-12`}
+                        required
+                      />
+                    </div>
+
+                    {pinError && (
+                      <p className="mt-2 text-sm text-pink-400">
+                        {pinError}
+                      </p>
+                    )}
+
+                    <p className="mt-2 text-xs text-white/35">
+                      This address can be shared as
+                      ///word.word.word and opened through 3WORDPIN.
+                    </p>
+                  </div>
+
+                  {/* Contract */}
+                  <div>
+                    <label className="mb-2 block text-sm font-bold">
+                      Contract Address *
+                    </label>
+
+                    <input
+                      value={contractAddress}
+                      onChange={(e) =>
+                        setContractAddress(e.target.value)
+                      }
+                      placeholder="0x..."
+                      className={inputClass}
                       required
                     />
                   </div>
 
-                  {submitMessage && (
-                    <div className={`mt-6 p-4 rounded-lg ${
-                      submitMessage.includes('✅') 
-                        ? 'bg-green-500/20 border border-green-500/50' 
-                        : 'bg-red-500/20 border border-red-500/50'
-                    }`}>
-                      <p className="text-center text-white">{submitMessage}</p>
+                  {/* Collection / creator */}
+                  <div className="grid gap-6 sm:grid-cols-2">
+                    <div>
+                      <label className="mb-2 block text-sm font-bold">
+                        Collection Name *
+                      </label>
+
+                      <input
+                        value={collectionName}
+                        onChange={(e) =>
+                          setCollectionName(e.target.value)
+                        }
+                        placeholder="My NFT Collection"
+                        className={inputClass}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-bold">
+                        Creator Name *
+                      </label>
+
+                      <input
+                        value={creatorName}
+                        onChange={(e) =>
+                          setCreatorName(e.target.value)
+                        }
+                        placeholder="Creator / Studio"
+                        className={inputClass}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  {/* Website / X / Discord */}
+                  <div className="grid gap-6 sm:grid-cols-3">
+                    <div>
+                      <label className="mb-2 block text-sm font-bold">
+                        Website
+                      </label>
+
+                      <input
+                        value={websiteUrl}
+                        onChange={(e) =>
+                          setWebsiteUrl(e.target.value)
+                        }
+                        placeholder="https://..."
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-bold">
+                        X / Twitter
+                      </label>
+
+                      <input
+                        value={xProfile}
+                        onChange={(e) =>
+                          setXProfile(e.target.value)
+                        }
+                        placeholder="@username"
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="mb-2 block text-sm font-bold">
+                        Discord
+                      </label>
+
+                      <input
+                        value={discord}
+                        onChange={(e) =>
+                          setDiscord(e.target.value)
+                        }
+                        placeholder="discord.gg/..."
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Description */}
+                  <div>
+                    <label className="mb-2 block text-sm font-bold">
+                      Description
+                    </label>
+
+                    <textarea
+                      value={description}
+                      onChange={(e) =>
+                        setDescription(e.target.value)
+                      }
+                      placeholder="Tell us about your collection..."
+                      rows={5}
+                      className={`${inputClass} resize-none`}
+                    />
+                  </div>
+
+                  {message && (
+                    <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/5 p-4 text-sm text-cyan-200">
+                      {message}
                     </div>
                   )}
 
-                  <div className="mt-8 text-center">
-                    <button 
-                      type="submit"
-                      disabled={isSubmitting || !address}
-                      className="px-8 py-4 bg-gradient-to-r from-forest-500 to-forest-600 hover:from-forest-600 hover:to-forest-700 text-white font-semibold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                    >
-                      {isSubmitting ? 'Submitting...' : 'Submit for Review'}
-                    </button>
-                    {!address && (
-                      <p className="text-sm text-yellow-500 mt-3">
-                        Please connect your wallet to submit
-                      </p>
-                    )}
-                    <p className="text-sm text-gray-500 mt-3">
-                      Review process typically takes 2-5 business days
-                    </p>
-                  </div>
+                  {!isConnected && (
+                    <div className="rounded-2xl border border-pink-400/20 bg-pink-400/5 p-4 text-sm text-pink-200">
+                      Connect your wallet before submitting a
+                      collection.
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={submitting || !isConnected}
+                    className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-pink-500 px-6 py-4 font-black text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {submitting
+                      ? "Submitting..."
+                      : "Submit Collection →"}
+                  </button>
                 </form>
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Admin Panel Tab */}
-          {activeTab === 'admin' && isAdmin && (
-            <div className="max-w-6xl mx-auto">
-              <div className="glass-card p-8 mb-8">
-                <div className="text-center mb-8">
-                  <h2 className="text-3xl font-bold mb-4 text-white">Admin Panel</h2>
-                  <p className="text-gray-400">Manage collection submissions and approvals</p>
-                </div>
-                
-                {/* View Toggle */}
-                <div className="flex justify-center mb-8">
-                  <div className="glass-card p-1 inline-flex rounded-lg">
-                    <button
-                      onClick={() => setAdminView('submissions')}
-                      className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
-                        adminView === 'submissions'
-                          ? 'bg-forest-500/30 text-forest-300'
-                          : 'text-gray-400 hover:text-gray-300'
-                      }`}
-                    >
-                      Pending Submissions
-                      {submissions.length > 0 && (
-                        <span className="ml-2 px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">
-                          {submissions.length}
-                        </span>
-                      )}
-                    </button>
-                    <button
-                      onClick={() => setAdminView('deployed')}
-                      className={`px-6 py-2 rounded-lg font-medium transition-all duration-200 ${
-                        adminView === 'deployed'
-                          ? 'bg-forest-500/30 text-forest-300'
-                          : 'text-gray-400 hover:text-gray-300'
-                      }`}
-                    >
-                      Deployed Collections
-                      {deployedCollections.length > 0 && (
-                        <span className="ml-2 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
-                          {deployedCollections.length}
-                        </span>
-                      )}
-                    </button>
+          {/* ADMIN */}
+          {activeTab === "admin" && isAdmin && (
+            <section className="mx-auto mt-10 max-w-6xl">
+              <div className={`${cardClass} overflow-hidden`}>
+                <div className="border-b border-white/10 p-7 sm:p-10">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                      <div className="mb-3 text-xs font-bold tracking-[0.2em] text-white/40 uppercase">
+                        Restricted Area
+                      </div>
+
+                      <h2 className="text-3xl font-black">
+                        Admin Dashboard
+                      </h2>
+
+                      <p className="mt-2 text-white/40">
+                        Manage collection verification and approvals.
+                      </p>
+                    </div>
+
+                    <div className="rounded-full border border-cyan-400/20 bg-cyan-400/5 px-4 py-2 text-xs font-bold text-cyan-300">
+                      ADMIN VERIFIED
+                    </div>
                   </div>
                 </div>
 
-                {/* Pending Submissions View */}
-                {adminView === 'submissions' && (
-                  <>
-                    {isLoadingSubmissions ? (
-                      <div className="text-center py-12">
-                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-forest-500"></div>
-                        <p className="text-gray-400 mt-4">Loading submissions...</p>
+                {/* Admin tabs */}
+                <div className="flex border-b border-white/10">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setAdminView("submissions")
+                    }
+                    className={`flex-1 px-5 py-4 text-sm font-bold transition ${
+                      adminView === "submissions"
+                        ? "border-b-2 border-cyan-400 text-cyan-300"
+                        : "text-white/35 hover:text-white"
+                    }`}
+                  >
+                    Pending Submissions
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setAdminView("collections")
+                    }
+                    className={`flex-1 px-5 py-4 text-sm font-bold transition ${
+                      adminView === "collections"
+                        ? "border-b-2 border-pink-400 text-pink-300"
+                        : "text-white/35 hover:text-white"
+                    }`}
+                  >
+                    Deployed Collections
+                  </button>
+                </div>
+
+                {/* Pending submissions */}
+                {adminView === "submissions" && (
+                  <div className="p-7 sm:p-10">
+                    {loadingSubmissions ? (
+                      <div className="py-16 text-center text-white/40">
+                        Loading submissions...
                       </div>
                     ) : submissions.length === 0 ? (
-                      <div className="text-center py-12">
-                        <p className="text-gray-400 text-lg">No pending submissions</p>
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center text-white/40">
+                        No pending submissions.
                       </div>
                     ) : (
-                  <div className="space-y-6">
-                    {submissions.map((submission) => (
-                      <div key={submission.id} className="glass-card p-6 border border-white/10">
-                        <div className="grid md:grid-cols-2 gap-6">
-                          {/* Submission Details */}
-                          <div className="space-y-3">
-                            <div>
-                              <h3 className="text-xl font-bold text-white">{submission.collection_name}</h3>
-                              <p className="text-sm text-gray-400">by {submission.creator_name}</p>
-                            </div>
-                            
-                            <div>
-                              <label className="text-xs text-gray-500 uppercase">Contract Address</label>
-                              <a 
-                                href={`https://plasmascan.to/address/${submission.contract_address}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="block text-forest-300 hover:text-forest-200 font-mono text-sm break-all"
-                              >
-                                {submission.contract_address}
-                              </a>
-                            </div>
-                            
-                            <div>
-                              <label className="text-xs text-gray-500 uppercase">Submitter</label>
-                              <p className="text-white font-mono text-sm">{submission.submitter_address}</p>
-                            </div>
-                            
-                            <div>
-                              <label className="text-xs text-gray-500 uppercase">Submitted</label>
-                              <p className="text-white text-sm">
-                                {new Date(submission.submitted_at).toLocaleString()}
-                              </p>
-                            </div>
-                            
-                            {/* Contract Details */}
-                            <div className="border-t border-white/10 pt-3 space-y-2">
-                              <h4 className="text-xs text-gray-400 uppercase font-semibold">Contract Details</h4>
-                              
-                              {submission.symbol && (
-                                <div>
-                                  <label className="text-xs text-gray-500">Symbol</label>
-                                  <p className="text-white text-sm">{submission.symbol}</p>
-                                </div>
-                              )}
-                              
-                              {submission.total_supply && (
-                                <div>
-                                  <label className="text-xs text-gray-500">Max Supply</label>
-                                  <p className="text-white text-sm">{submission.total_supply.toLocaleString()}</p>
-                                </div>
-                              )}
-                              
-                              {submission.mint_price && (
-                                <div>
-                                  <label className="text-xs text-gray-500">Mint Price</label>
-                                  <p className="text-white text-sm">{submission.mint_price} XPL</p>
-                                </div>
-                              )}
-                            </div>
-                            
-                            {submission.website_url && (
-                              <div>
-                                <label className="text-xs text-gray-500 uppercase">Website</label>
-                                <a 
-                                  href={submission.website_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="block text-forest-300 hover:text-forest-200 text-sm"
-                                >
-                                  {submission.website_url}
-                                </a>
-                              </div>
-                            )}
-                            
-                            {submission.x_profile && (
-                              <div>
-                                <label className="text-xs text-gray-500 uppercase">X Profile</label>
-                                <p className="text-white text-sm">{submission.x_profile}</p>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Description & Actions */}
-                          <div className="space-y-4">
-                            <div>
-                              <label className="text-xs text-gray-500 uppercase">Description</label>
-                              <p className="text-white text-sm mt-1 whitespace-pre-wrap">{submission.description}</p>
-                            </div>
-                            
-                            {/* Contract Type Selection */}
-                            <div>
-                              <label className="text-xs text-gray-500 uppercase mb-2 block">Contract Type</label>
-                              <select 
-                                id={`type-${submission.id}`}
-                                className="w-full p-2 bg-gray-800 border border-white/10 rounded-lg text-white text-sm [color-scheme:dark]"
-                                defaultValue="basic"
-                              >
-                                <option value="basic">Basic</option>
-                                <option value="editions">Editions</option>
-                                <option value="pro">Pro</option>
-                              </select>
-                            </div>
-                            
-                            {/* Action Buttons */}
-                            <div className="flex gap-3 pt-4">
-                              <button
-                                onClick={() => {
-                                  const select = document.getElementById(`type-${submission.id}`) as HTMLSelectElement;
-                                  handleReview(submission.id, 'approve', select.value);
-                                }}
-                                disabled={reviewingId === submission.id}
-                                className="flex-1 px-4 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                {reviewingId === submission.id ? 'Processing...' : '✅ Approve & Create Mint Page'}
-                              </button>
-                              
-                              <button
-                                onClick={() => handleReview(submission.id, 'deny')}
-                                disabled={reviewingId === submission.id}
-                                className="px-4 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                ❌ Deny
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                    )}
-                  </>
-                )}
-                
-                {/* Deployed Collections View */}
-                {adminView === 'deployed' && (
-                  <>
-                    {isLoadingCollections ? (
-                      <div className="text-center py-12">
-                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-forest-500"></div>
-                        <p className="text-gray-400 mt-4">Loading deployed collections...</p>
-                      </div>
-                    ) : deployedCollections.length === 0 ? (
-                      <div className="text-center py-12">
-                        <p className="text-gray-400 text-lg">All deployed collections are already approved! 🎉</p>
-                      </div>
-                    ) : (
-                      <div className="space-y-6">
-                        {deployedCollections.map((collection) => (
-                          <div key={collection.contract_address} className="glass-card p-6 border border-white/10">
-                            <div className="grid md:grid-cols-3 gap-6">
-                              {/* Collection Info */}
-                              <div className="md:col-span-2 space-y-3">
-                                <div>
-                                  <h3 className="text-xl font-bold text-white">{collection.name}</h3>
-                                  <div className="flex items-center gap-2 mt-1">
-                                    <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                                      collection.contract_type === 'pro' ? 'bg-purple-500/20 text-purple-300' :
-                                      collection.contract_type === 'editions' ? 'bg-blue-500/20 text-blue-300' :
-                                      'bg-green-500/20 text-green-300'
-                                    }`}>
-                                      {collection.contract_type.toUpperCase()}
-                                    </span>
-                                    <span className="px-2 py-0.5 text-xs rounded-full font-medium bg-green-500/20 text-green-300">
-                                      DEPLOYED
-                                    </span>
+                      <div className="space-y-4">
+                        {submissions.map((submission) => (
+                          <div
+                            key={submission.id}
+                            className="rounded-3xl border border-white/10 bg-white/[0.025] p-6"
+                          >
+                            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                              <div className="min-w-0">
+                                <h3 className="text-xl font-black">
+                                  {submission.collectionName}
+                                </h3>
+
+                                <p className="mt-1 text-sm text-white/45">
+                                  by {submission.creatorName}
+                                </p>
+
+                                {submission.pinAddress && (
+                                  <div className="mt-4 inline-flex rounded-xl border border-cyan-400/20 bg-cyan-400/5 px-3 py-2 text-sm font-bold text-cyan-300">
+                                    ///{normalizePin(
+                                      submission.pinAddress
+                                    )}
                                   </div>
+                                )}
+
+                                <div className="mt-4 break-all rounded-xl bg-black/30 p-3 font-mono text-xs text-white/40">
+                                  {submission.contractAddress}
                                 </div>
-                                
-                                <div>
-                                  <label className="text-xs text-gray-500 uppercase">Contract Address</label>
-                                  <a 
-                                    href={`https://plasmascan.to/address/${collection.contract_address}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block text-forest-300 hover:text-forest-200 font-mono text-sm break-all"
-                                  >
-                                    {collection.contract_address}
-                                  </a>
-                                </div>
-                                
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div>
-                                    <label className="text-xs text-gray-500 uppercase">Symbol</label>
-                                    <p className="text-white text-sm">{collection.symbol}</p>
-                                  </div>
-                                  <div>
-                                    <label className="text-xs text-gray-500 uppercase">Max Supply</label>
-                                    <p className="text-white text-sm">{collection.max_supply?.toLocaleString()}</p>
-                                  </div>
-                                  <div>
-                                    <label className="text-xs text-gray-500 uppercase">Mint Price</label>
-                                    <p className="text-white text-sm">{collection.mint_price} XPL</p>
-                                  </div>
-                                  <div>
-                                    <label className="text-xs text-gray-500 uppercase">Deployed</label>
-                                    <p className="text-white text-sm">
-                                      {new Date(collection.created_at).toLocaleDateString()}
-                                    </p>
-                                  </div>
-                                </div>
-                                
-                                <div>
-                                  <label className="text-xs text-gray-500 uppercase">Contract Address (Short)</label>
-                                  <p className="text-white font-mono text-xs">
-                                    {collection.contract_address.slice(0, 6)}...{collection.contract_address.slice(-4)}
+
+                                {submission.description && (
+                                  <p className="mt-4 max-w-2xl text-sm leading-6 text-white/45">
+                                    {submission.description}
                                   </p>
-                                </div>
-                                
-                                <div>
-                                  <label className="text-xs text-gray-500 uppercase">Deployer</label>
-                                  <p className="text-white font-mono text-xs">{collection.deployer_address}</p>
-                                </div>
+                                )}
                               </div>
-                              
-                              {/* Actions */}
-                              <div className="flex flex-col justify-between">
-                                <div className="space-y-3">
-                                  <a
-                                    href={`/mint/${collection.contract_address}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-center font-medium rounded-lg transition-colors"
-                                  >
-                                    View Mint Page →
-                                  </a>
-                                  
-                                  <a
-                                    href={`https://plasmascan.to/address/${collection.contract_address}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-center font-medium rounded-lg transition-colors"
-                                  >
-                                    View on Explorer →
-                                  </a>
-                                </div>
-                                
+
+                              <div className="flex shrink-0 gap-2">
                                 <button
-                                  onClick={() => handleApproveCollection(collection.contract_address)}
-                                  disabled={approvingAddress === collection.contract_address}
-                                  className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-semibold rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed mt-4"
+                                  type="button"
+                                  disabled={
+                                    reviewingId ===
+                                    submission.id
+                                  }
+                                  onClick={() =>
+                                    reviewSubmission(
+                                      submission.id,
+                                      "approve"
+                                    )
+                                  }
+                                  className="rounded-xl bg-cyan-400 px-4 py-3 text-sm font-black text-black disabled:opacity-40"
                                 >
-                                  {approvingAddress === collection.contract_address ? 'Approving...' : '✨ Approve & Feature'}
+                                  Approve
+                                </button>
+
+                                <button
+                                  type="button"
+                                  disabled={
+                                    reviewingId ===
+                                    submission.id
+                                  }
+                                  onClick={() =>
+                                    reviewSubmission(
+                                      submission.id,
+                                      "deny"
+                                    )
+                                  }
+                                  className="rounded-xl border border-pink-400/20 bg-pink-400/10 px-4 py-3 text-sm font-bold text-pink-300 disabled:opacity-40"
+                                >
+                                  Deny
                                 </button>
                               </div>
                             </div>
@@ -989,57 +1049,150 @@ export default function CreatePage() {
                         ))}
                       </div>
                     )}
-                  </>
+                  </div>
+                )}
+
+                {/* Deployed collections */}
+                {adminView === "collections" && (
+                  <div className="p-7 sm:p-10">
+                    {loadingCollections ? (
+                      <div className="py-16 text-center text-white/40">
+                        Loading collections...
+                      </div>
+                    ) : deployedCollections.length === 0 ? (
+                      <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center text-white/40">
+                        No unapproved collections.
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {deployedCollections.map(
+                          (collection) => (
+                            <div
+                              key={
+                                collection.id ||
+                                collection.contractAddress
+                              }
+                              className="rounded-3xl border border-white/10 bg-white/[0.025] p-6"
+                            >
+                              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                                <div>
+                                  <h3 className="text-xl font-black">
+                                    {collection.collectionName ||
+                                      "Unnamed Collection"}
+                                  </h3>
+
+                                  {collection.creatorName && (
+                                    <p className="mt-1 text-sm text-white/40">
+                                      by{" "}
+                                      {
+                                        collection.creatorName
+                                      }
+                                    </p>
+                                  )}
+
+                                  {collection.pinAddress && (
+                                    <div className="mt-3 inline-flex rounded-xl border border-cyan-400/20 bg-cyan-400/5 px-3 py-2 text-sm font-bold text-cyan-300">
+                                      ///{normalizePin(
+                                        collection.pinAddress
+                                      )}
+                                    </div>
+                                  )}
+
+                                  <div className="mt-3 break-all font-mono text-xs text-white/35">
+                                    {
+                                      collection.contractAddress
+                                    }
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                  <a
+                                    href={`https://explorer.plasma.to/address/${collection.contractAddress}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-bold text-white/70 hover:bg-white/10 hover:text-white"
+                                  >
+                                    Explorer ↗
+                                  </a>
+
+                                  <a
+                                    href={`/mint/${collection.contractAddress}`}
+                                    className="rounded-xl border border-cyan-400/20 bg-cyan-400/10 px-4 py-3 text-sm font-bold text-cyan-300"
+                                  >
+                                    Mint Page
+                                  </a>
+
+                                  <button
+                                    type="button"
+                                    disabled={
+                                      approvingAddress ===
+                                      collection.contractAddress
+                                    }
+                                    onClick={() =>
+                                      approveCollection(
+                                        collection.contractAddress
+                                      )
+                                    }
+                                    className="rounded-xl bg-gradient-to-r from-cyan-400 to-pink-500 px-4 py-3 text-sm font-black text-black disabled:opacity-40"
+                                  >
+                                    {approvingAddress ===
+                                    collection.contractAddress
+                                      ? "Approving..."
+                                      : "Approve"}
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-            </div>
+            </section>
           )}
 
-          {/* Additional Resources */}
-          <div className="max-w-4xl mx-auto mt-16">
-            <h2 className="text-2xl font-bold text-white text-center mb-8">Developer Resources</h2>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="glass-card p-6 text-center">
-                <div className="w-12 h-12 bg-forest-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-6 h-6 text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
+          {/* Bottom CTA */}
+          {activeTab !== "admin" && (
+            <section className="mx-auto mt-14 max-w-4xl text-center">
+              <div className="rounded-3xl border border-white/10 bg-white/[0.025] p-8 backdrop-blur-xl sm:p-12">
+                <div className="text-sm font-bold tracking-[0.2em] text-white/35 uppercase">
+                  Keep It Simple
                 </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Documentation</h3>
-                <p className="text-gray-400 text-sm mb-4">Complete guides for deploying NFT contracts</p>
-                <a href="https://docs.plasma.to" target="_blank" rel="noopener noreferrer" className="text-forest-300 hover:text-forest-200 text-sm font-medium">
-                  View Docs →
-                </a>
-              </div>
 
-              <div className="glass-card p-6 text-center">
-                <div className="w-12 h-12 bg-forest-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-6 h-6 text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Smart Contracts</h3>
-                <p className="text-gray-400 text-sm mb-4">Open-source contract templates and examples</p>
-                <a href="https://github.com/plasma-network" target="_blank" rel="noopener noreferrer" className="text-forest-300 hover:text-forest-200 text-sm font-medium">
-                  GitHub →
-                </a>
-              </div>
+                <h2 className="mt-4 text-3xl font-black sm:text-4xl">
+                  One collection.
+                  <br />
+                  <span className={gradientText}>
+                    One memorable address.
+                  </span>
+                </h2>
 
-              <div className="glass-card p-6 text-center">
-                <div className="w-12 h-12 bg-forest-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-6 h-6 text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-white mb-2">Community</h3>
-                <p className="text-gray-400 text-sm mb-4">Get help from other creators and developers</p>
-                <p className="text-gray-500 text-sm font-medium">
-                  Coming Soon
+                <p className="mx-auto mt-4 max-w-xl text-white/40">
+                  3WORDPIN turns complicated blockchain addresses
+                  and locations into something people can actually
+                  remember and share.
                 </p>
+
+                {pinAddress && isValidPin(pinAddress) && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        `/p/${encodeURIComponent(
+                          normalizePin(pinAddress)
+                        )}`
+                      )
+                    }
+                    className="mt-7 rounded-2xl border border-cyan-400/20 bg-cyan-400/5 px-6 py-3 font-bold text-cyan-300 transition hover:bg-cyan-400/10"
+                  >
+                    View ///{normalizePin(pinAddress)} →
+                  </button>
+                )}
               </div>
-            </div>
-          </div>
+            </section>
+          )}
         </main>
 
         <Footer />
