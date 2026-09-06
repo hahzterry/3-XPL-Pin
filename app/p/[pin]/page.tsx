@@ -1,13 +1,11 @@
-// app/p/[pin]/page.tsx
-
 "use client";
-
 import { useParams } from "next/navigation";
-
 export default function PinPage() {
-  const params = useParams();
-  const pin = params.pin as string;
-
+  const params = useParams<{ pin: string }>();
+  if (!params) {
+    return null;
+  }
+  const pin = params.pin;
   return (
     <div>
       <h1>{pin}</h1>
