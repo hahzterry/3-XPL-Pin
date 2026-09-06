@@ -1,9 +1,25 @@
 export type AssetType =
   | "rental"
-  | "property"
   | "vehicle"
   | "driver"
   | "delivery"
   | "service"
-  | "event"
-  | "business";
+  | "business"
+  | "event";
+
+export type RentalType =
+  | "home"
+  | "apartment"
+  | "room"
+  | "office"
+  | "vehicle"
+  | "equipment";
+
+export type ServiceType =
+  | "driver"
+  | "delivery"
+  | "cleaning"
+  | "moving"
+  | "handyman"
+  | "photography"
+  | "other";
