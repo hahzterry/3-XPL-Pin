@@ -28,7 +28,7 @@ export default function Footer() {
 
               <div>
                 <span className="text-2xl font-bold tracking-tight text-white">
-                  3 WORD PIN
+                  3 WORD PIN XPLBNB
                 </span>
                 <span className="ml-2 text-sm font-light text-cyan-300">
                   /// KEEP.IT.SIMPLE
@@ -41,17 +41,17 @@ export default function Footer() {
             </p>
 
             <p className="max-w-xl text-base leading-relaxed text-white/65">
-              3 Word Pin makes it simple to give any location a memorable
+              3 Word Pin XPLBNB makes it simple to give any location a memorable
               three-word address that anyone can share, search, and use to
               find you anywhere.
             </p>
 
-            {/* XRPLBNB value proposition */}
+            {/* XPLBNB value proposition */}
             <div className="mt-7 rounded-2xl border border-cyan-400/20 bg-white/[0.03] p-5 backdrop-blur-xl">
               <div className="mb-2 flex items-center gap-2">
                 <span className="text-lg">⚡</span>
                 <h3 className="font-bold text-white">
-                  XRPLBNB
+                  XPLBNB
                 </h3>
               </div>
 
