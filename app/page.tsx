@@ -97,6 +97,12 @@ export default function Home() {
                   🪙 Own a 3 Word Pin
                 </Link>
                 <a
+                  href="/inscriptions"
+                  className="px-8 py-4 font-bold text-pink-300 transition border rounded-xl bg-pink-400/20 border-pink-400/30 hover:bg-pink-400/30"
+                >
+                  🎨 Customize 3 Word Pin 
+                </a>
+                <a
                   href="https://social.3wordpin.com"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -218,69 +224,96 @@ export default function Home() {
             </div>
           </section>
 
-          {/* APP DOWNLOAD — with Twitter/X embed */}
-          <section className="relative overflow-hidden border-y border-white/10">
-            {/* Background Twitter/X Embed */}
-            <div className="absolute inset-0 flex items-center justify-center w-full h-full overflow-hidden pointer-events-none opacity-10">
-              <div className="scale-150">
-                <blockquote className="twitter-tweet" data-dnt="true" data-theme="dark">
-                  <a href="https://twitter.com/Plasma/status/2067215787945779394"></a>
-                </blockquote>
-              </div>
-            </div>
-            <Script
-              async
-              src="https://platform.twitter.com/widgets.js"
-              strategy="afterInteractive"
+{/* APP DOWNLOAD — VIDEO BACKGROUND */}
+<section className="relative min-h-[600px] overflow-hidden border-y border-white/10">
+
+  {/* Background Video */}
+  <div className="absolute inset-0 z-0">
+    <video
+      className="absolute inset-0 object-cover w-full h-full"
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      aria-hidden="true"
+    >
+      <source src="/videos/plasma-video.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  {/* Video darkening / readability overlay */}
+  <div className="absolute inset-0 z-[1] bg-black/65" />
+
+  {/* Optional cinematic gradient */}
+  <div className="absolute inset-0 z-[2] bg-gradient-to-r from-black/80 via-black/45 to-black/75" />
+
+  {/* Content */}
+  <div className="relative z-10 flex min-h-[600px] items-center justify-center">
+    <div className="max-w-5xl px-6 py-24 mx-auto text-center">
+
+      <h2 className="text-4xl font-black md:text-6xl">
+        Get the XPL app
+      </h2>
+
+      <p className="mt-6 text-xl text-gray-300">
+        Download the app and get a card.
+      </p>
+
+      <div className="flex flex-wrap justify-center gap-4 mt-10">
+
+        <a
+          href="https://www.plasma.org/download"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-8 py-4 font-black text-black transition bg-white rounded-xl hover:bg-gray-200"
+        >
+          Download App
+        </a>
+
+        <a
+          href="https://www.plasma.org/download"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-8 py-4 font-bold text-white transition border rounded-xl border-white/20 bg-white/10 hover:bg-white/20"
+        >
+          Get a Card
+        </a>
+
+      </div>
+
+      <p className="mt-6 text-2xl font-bold text-cyan-300">
+        20% back on flights, hotels, and more
+      </p>
+
+      <div className="mt-4">
+        <a
+          href="https://www.plasma.org/download/travel"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white transition border rounded-lg border-white/20 bg-white/10 hover:bg-white/20 hover:border-white/40"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
             />
+          </svg>
 
-            {/* Dark overlay for readability */}
-            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+          Travel Perks → Get 20% back
+        </a>
+      </div>
 
-            {/* Content */}
-            <div className="relative z-10 max-w-5xl px-6 py-24 mx-auto text-center">
-              <h2 className="text-4xl font-black md:text-6xl">
-                Get the XPL app
-              </h2>
-              <p className="mt-6 text-xl text-gray-300">
-                Download the app and get a card.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4 mt-10">
-                <a
-                  href="https://www.plasma.org/download"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-8 py-4 font-black text-black transition bg-white rounded-xl hover:bg-gray-200"
-                >
-                  Download App
-                </a>
-                <a
-                  href="https://www.plasma.org/download"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-8 py-4 font-bold text-white transition border rounded-xl border-white/20 bg-white/5 hover:bg-white/10"
-                >
-                  Get a Card
-                </a>
-              </div>
-              <p className="mt-6 text-2xl font-bold text-cyan-300">
-                20% back on flights, hotels, and more
-              </p>
-              <div className="mt-4">
-                <a
-                  href="https://www.plasma.org/download/travel"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white transition border rounded-lg border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/40"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Travel Perks → Get 20% back
-                </a>
-              </div>
-            </div>
-          </section>
+    </div>
+  </div>
+</section>
 
         </main>
 
