@@ -98,93 +98,370 @@ export default function Home() {
           {/* HERO */}
           <section className="max-w-7xl mx-auto px-6 pt-24 pb-28 md:pt-36 md:pb-36">
 
-            <div className="max-w-5xl mx-auto text-center">
+            <div className="max-w-6xl mx-auto text-center">
 
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300 text-sm font-medium">
+              {/* EYEBROW */}
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-400/20 bg-cyan-400/5 text-cyan-300 text-sm font-semibold">
 
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
 
-                The next generation of location-based commerce
+                Airbnb + DoorDash + Uber → One 3-word address
 
               </div>
 
-              <h1 className="mt-8 text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.92]">
+              {/* MAIN HEADLINE */}
+              <h1 className="mt-8 text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.9]">
 
-                Airbnb.
-                <br />
-
-                Uber.
-                <br />
-
-                DoorDash.
+                NO
 
                 <br />
 
                 <span className="bg-gradient-to-r from-cyan-300 via-white to-pink-400 bg-clip-text text-transparent">
-                  Reimagined around the place.
+                  MIDDLEMAN FEES.
                 </span>
 
               </h1>
 
-              <p className="mt-8 max-w-3xl mx-auto text-xl md:text-2xl text-gray-400 leading-relaxed">
+              {/* CORE EXPLANATION */}
+              <p className="mt-8 max-w-4xl mx-auto text-xl md:text-2xl lg:text-3xl text-gray-200 leading-relaxed font-semibold">
 
-                XPLBNB connects the <span className="text-white font-semibold">person,
-                place, service, booking and payment</span> in one simple
-                experience — powered by Plasma and 3-word locations.
+                Imagine
+
+                <span className="text-white">
+                  {' '}Airbnb + DoorDash + Uber{' '}
+                </span>
+
+                mapped to a
+
+                <span className="text-cyan-300">
+                  {' '}3-word address
+                </span>
+
+                —
+
+                <span className="text-pink-400">
+                  {' '}///KEEP.IT.SIMPLE
+                </span>
 
               </p>
 
-              <div className="mt-10 flex flex-col sm:flex-row justify-center gap-4">
+              {/* XPLBNB PROMISE */}
+              <p className="mt-5 max-w-3xl mx-auto text-lg md:text-xl text-gray-400 leading-relaxed">
 
-                <Link
-                  href="/explore"
-                  className="px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-300 to-pink-400 text-black font-black text-lg hover:opacity-90 transition"
-                >
-                  Explore the Marketplace
-                </Link>
+                XPLBNB connects hosts, guests, drivers, passengers,
+                businesses and customers directly — with a
 
-                <Link
-                  href="/create"
-                  className="px-8 py-4 rounded-xl border border-white/15 bg-white/5 font-bold text-lg hover:bg-white/10 transition"
-                >
-                  List Your Business
-                </Link>
+                <span className="text-white font-bold">
+                  {' '}0.1% transaction fee
+                </span>
+
+                {' '}and a digital invoice powered by Plasma.
+
+              </p>
+
+              {/* BIG DIFFERENCE */}
+              <div className="mt-10 max-w-5xl mx-auto">
+
+                <div className="rounded-3xl border border-cyan-400/20 bg-cyan-400/[0.04] p-6 md:p-8">
+
+                  <div className="text-xs uppercase tracking-[0.25em] text-cyan-300 font-black">
+                    THE XPLBNB MODEL
+                  </div>
+
+                  <div className="mt-6 grid md:grid-cols-3 gap-6">
+
+                    {/* STAYS */}
+                    <div className="text-left">
+
+                      <div className="text-3xl">
+                        🏠
+                      </div>
+
+                      <div className="mt-3 text-sm font-black tracking-widest text-white">
+                        STAYS
+                      </div>
+
+                      <p className="mt-2 text-sm text-gray-400 leading-relaxed">
+                        Airbnb service fees can add a significant percentage
+                        to the cost of a stay.
+                      </p>
+
+                      <p className="mt-3 text-sm text-gray-300 leading-relaxed">
+
+                        XPLBNB:
+
+                        <span className="text-cyan-300 font-bold">
+                          {' '}0.1% transaction fee
+                        </span>
+
+                        {' '}+
+
+                        <span className="text-white font-semibold">
+                          {' '}$5 / 30 days
+                        </span>
+
+                        {' '}for access to the
+
+                        <span className="text-white font-semibold">
+                          {' '}3 Word Pin Social Link.
+                        </span>
+
+                      </p>
+
+                    </div>
+
+                    {/* DELIVERY */}
+                    <div className="text-left">
+
+                      <div className="text-3xl">
+                        🍔
+                      </div>
+
+                      <div className="mt-3 text-sm font-black tracking-widest text-white">
+                        DELIVERY
+                      </div>
+
+                      <p className="mt-2 text-sm text-gray-400 leading-relaxed">
+                        DoorDash merchant delivery commissions can range
+                        from 15% to 30% depending on the plan.
+                      </p>
+
+                      <p className="mt-3 text-sm text-gray-300 leading-relaxed">
+
+                        XPL Dash:
+
+                        <span className="text-cyan-300 font-bold">
+                          {' '}$5 / 30 days
+                        </span>
+
+                        {' '}for the 3 Word Pin Social Link +
+
+                        <span className="text-white font-semibold">
+                          {' '}direct digital invoices.
+                        </span>
+
+                      </p>
+
+                    </div>
+
+                    {/* RIDES */}
+                    <div className="text-left">
+
+                      <div className="text-3xl">
+                        🚗
+                      </div>
+
+                      <div className="mt-3 text-sm font-black tracking-widest text-white">
+                        RIDES
+                      </div>
+
+                      <p className="mt-2 text-sm text-gray-400 leading-relaxed">
+                        Uber's service fee varies by trip rather than
+                        operating as one universal fixed split.
+                      </p>
+
+                      <p className="mt-3 text-sm text-gray-300 leading-relaxed">
+
+                        XPL Drivers:
+
+                        <span className="text-cyan-300 font-bold">
+                          {' '}$5 / 30 days
+                        </span>
+
+                        {' '}for the 3 Word Pin Social Link +
+
+                        <span className="text-white font-semibold">
+                          {' '}direct digital invoices.
+                        </span>
+
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                </div>
 
               </div>
 
-              <p className="mt-5 text-sm text-gray-600">
-                Built for hosts, drivers, passengers, delivery providers and customers.
-              </p>
+              {/* SOCIAL PROOF / VIDEO DIFFERENTIATOR */}
+              <div className="mt-8 max-w-4xl mx-auto">
 
-            </div>
+                <div className="rounded-2xl border border-pink-400/20 bg-pink-400/[0.04] p-6 md:p-7">
 
+                  <div className="text-xs uppercase tracking-[0.25em] text-pink-300 font-black">
+                    THE SOCIAL LAYER
+                  </div>
 
-            {/* VALUE STRIP */}
-            <div className="mt-20 grid md:grid-cols-4 gap-4 max-w-6xl mx-auto">
+                  <p className="mt-3 text-lg md:text-xl text-white font-bold">
 
-              <ValueCard
-                icon="🏠"
-                title="Hosts"
-                text="Own the relationship with your guests."
-              />
+                    Every destination gets a 3 Word Pin.
+                    Every transaction can create a digital invoice.
+                    Every experience can become a video review.
 
-              <ValueCard
-                icon="🚗"
-                title="Drivers"
-                text="Make pickup and drop-off locations precise."
-              />
+                  </p>
 
-              <ValueCard
-                icon="📦"
-                title="Delivery"
-                text="Send customers directly to the right place."
-              />
+                  <p className="mt-3 text-gray-400 leading-relaxed">
 
-              <ValueCard
-                icon="👤"
-                title="Customers"
-                text="Find, verify and book with less friction."
-              />
+                    Hosts get guest video reviews.
+                    Businesses get delivery proof.
+                    Drivers get passenger video reviews.
+                    Customers get real-world proof attached to a precise
+                    3-word location.
+
+                  </p>
+
+                  <a
+                    href="https://social.3wordpin.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex mt-5 px-6 py-3 rounded-xl border border-pink-400/30 bg-pink-400/10 text-pink-300 font-bold hover:bg-pink-400/20 transition"
+                  >
+                    💬 Explore 3 Word Pin Social
+                  </a>
+
+                </div>
+
+              </div>
+
+              {/* WHO SAVES */}
+              <div className="mt-8 grid md:grid-cols-3 gap-4 max-w-5xl mx-auto">
+
+                <SavingsCard
+                  icon="🏠"
+                  title="HOSTS + GUESTS"
+                  text="Replace percentage-based platform fees with a 0.1% XPL transaction."
+                  color="cyan"
+                />
+
+                <SavingsCard
+                  icon="🍔"
+                  title="BUSINESSES + DRIVERS"
+                  text="Connect orders, invoices and delivery proof directly."
+                  color="violet"
+                />
+
+                <SavingsCard
+                  icon="🚗"
+                  title="DRIVERS + PASSENGERS"
+                  text="Connect directly, pay by digital invoice and leave video reviews."
+                  color="pink"
+                />
+
+              </div>
+
+              {/* SEARCH */}
+              <form
+                onSubmit={handleSearch}
+                className="mt-10 max-w-2xl mx-auto"
+              >
+
+                <div className="flex flex-col sm:flex-row gap-3 p-2 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl">
+
+                  <div className="flex-1 flex items-center px-4">
+
+                    <span className="text-cyan-400 font-mono text-lg mr-2">
+                      ///
+                    </span>
+
+                    <input
+                      type="text"
+                      value={wordPin}
+                      onChange={(e) => setWordPin(e.target.value)}
+                      placeholder="word.word.word"
+                      className="w-full bg-transparent outline-none text-white placeholder-gray-600 text-lg"
+                    />
+
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="px-7 py-4 rounded-xl bg-gradient-to-r from-cyan-300 to-pink-400 text-black font-black hover:opacity-90 transition"
+                  >
+                    Find It
+                  </button>
+
+                </div>
+
+                <p className="mt-3 text-sm text-gray-600">
+                  Find a place, ride, service, business or delivery destination.
+                </p>
+
+              </form>
+
+              {/* SIMPLE COMPARISON */}
+              <div className="mt-16 max-w-5xl mx-auto">
+
+                <div className="grid md:grid-cols-2 gap-4 text-left">
+
+                  {/* OLD */}
+                  <div className="rounded-2xl border border-red-400/10 bg-red-400/[0.03] p-6">
+
+                    <div className="text-xs uppercase tracking-widest text-red-300/70 font-bold">
+                      THE OLD MODEL
+                    </div>
+
+                    <div className="mt-5 space-y-3 text-gray-500">
+
+                      <div>✕ Airbnb takes a percentage</div>
+                      <div>✕ DoorDash takes a percentage</div>
+                      <div>✕ Uber takes a service fee</div>
+                      <div>✕ Platform controls the relationship</div>
+                      <div>✕ Reviews stay inside the platform</div>
+                      <div>✕ Multiple apps for different services</div>
+
+                    </div>
+
+                  </div>
+
+                  {/* XPL */}
+                  <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.04] p-6">
+
+                    <div className="text-xs uppercase tracking-widest text-cyan-300 font-bold">
+                      THE XPL MODEL
+                    </div>
+
+                    <div className="mt-5 space-y-3 text-gray-300">
+
+                      <div>✓ 3-word address</div>
+                      <div>✓ 0.1% transaction fee</div>
+                      <div>✓ $5 / 30-day Social Link access</div>
+                      <div>✓ Digital invoices instead of platform middlemen</div>
+                      <div>✓ TikTok-style video reviews</div>
+                      <div>✓ One location identity across services</div>
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              </div>
+
+              {/* FINAL POSITIONING */}
+              <div className="mt-14">
+
+                <p className="text-2xl md:text-4xl font-black tracking-tight">
+
+                  One address.
+
+                  <span className="text-cyan-300">
+                    {' '}One connection.
+                  </span>
+
+                  <br />
+
+                  <span className="bg-gradient-to-r from-cyan-300 via-white to-pink-400 bg-clip-text text-transparent">
+                    ///KEEP.IT.SIMPLE
+                  </span>
+
+                </p>
+
+                <p className="mt-4 text-gray-500 text-sm">
+                  That's XPLBNB.
+                </p>
+
+              </div>
 
             </div>
 
@@ -206,8 +483,13 @@ export default function Home() {
                 </p>
 
                 <h2 className="mt-4 text-4xl md:text-6xl font-black leading-tight">
+
                   Today's marketplaces
-                  <span className="text-gray-500"> are fragmented.</span>
+
+                  <span className="text-gray-500">
+                    {' '}are fragmented.
+                  </span>
+
                 </h2>
 
                 <p className="mt-6 text-xl text-gray-400 leading-relaxed">
@@ -216,7 +498,6 @@ export default function Home() {
                 </p>
 
               </div>
-
 
               <div className="mt-16 grid md:grid-cols-2 gap-6">
 
@@ -268,11 +549,15 @@ export default function Home() {
               </p>
 
               <h2 className="mt-4 text-4xl md:text-6xl font-black">
+
                 One place can power
+
                 <br />
+
                 <span className="bg-gradient-to-r from-cyan-300 to-violet-400 bg-clip-text text-transparent">
                   an entire local economy.
                 </span>
+
               </h2>
 
               <p className="mt-6 text-xl text-gray-400">
@@ -281,7 +566,6 @@ export default function Home() {
               </p>
 
             </div>
-
 
             <div className="mt-20 grid lg:grid-cols-3 gap-6">
 
@@ -339,12 +623,15 @@ export default function Home() {
               </p>
 
               <h2 className="mt-5 text-4xl md:text-6xl font-black leading-tight">
+
                 Don't just list your business.
+
                 <br />
 
                 <span className="text-gray-400">
                   Own the place people find you.
                 </span>
+
               </h2>
 
               <p className="mt-8 max-w-3xl mx-auto text-xl text-gray-400 leading-relaxed">
@@ -392,13 +679,19 @@ export default function Home() {
                 </p>
 
                 <h2 className="mt-4 text-4xl md:text-6xl font-black leading-tight">
+
                   Three words
+
                   <br />
+
                   become the
+
                   <br />
+
                   <span className="text-cyan-300">
                     destination.
                   </span>
+
                 </h2>
 
                 <p className="mt-6 text-lg text-gray-400 leading-relaxed">
@@ -443,7 +736,6 @@ export default function Home() {
                 </div>
 
               </div>
-
 
               <div className="relative">
 
@@ -511,11 +803,15 @@ export default function Home() {
               </div>
 
               <h2 className="mt-6 text-4xl md:text-6xl font-black">
+
                 Built for a world where
+
                 <br />
+
                 <span className="bg-gradient-to-r from-cyan-300 to-violet-400 bg-clip-text text-transparent">
                   money moves digitally.
                 </span>
+
               </h2>
 
               <p className="mt-6 max-w-3xl mx-auto text-xl text-gray-400 leading-relaxed">
@@ -566,7 +862,6 @@ export default function Home() {
 
             </div>
 
-
             <div className="mt-16 grid md:grid-cols-4 gap-5">
 
               <Step
@@ -612,13 +907,19 @@ export default function Home() {
                 </p>
 
                 <h2 className="mt-5 text-4xl md:text-7xl font-black leading-tight">
+
                   What if your
+
                   <br />
+
                   location was your
+
                   <br />
+
                   <span className="bg-gradient-to-r from-cyan-300 via-white to-pink-400 bg-clip-text text-transparent">
                     marketplace?
                   </span>
+
                 </h2>
 
                 <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-400">
@@ -686,6 +987,43 @@ export default function Home() {
 
 /* COMPONENTS */
 
+function SavingsCard({
+  icon,
+  title,
+  text,
+  color,
+}: {
+  icon: string;
+  title: string;
+  text: string;
+  color: 'cyan' | 'violet' | 'pink';
+}) {
+  const styles = {
+    cyan: 'border-cyan-400/15 bg-cyan-400/[0.03] text-cyan-300',
+    violet: 'border-violet-400/15 bg-violet-400/[0.03] text-violet-300',
+    pink: 'border-pink-400/15 bg-pink-400/[0.03] text-pink-300',
+  };
+
+  return (
+    <div className={`rounded-2xl border p-5 ${styles[color]}`}>
+
+      <div className="text-3xl">
+        {icon}
+      </div>
+
+      <div className="mt-3 text-xs tracking-[0.2em] font-black">
+        {title}
+      </div>
+
+      <div className="mt-2 text-white font-semibold">
+        {text}
+      </div>
+
+    </div>
+  );
+}
+
+
 function ValueCard({
   icon,
   title,
@@ -697,9 +1035,19 @@ function ValueCard({
 }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 hover:border-cyan-400/20 transition">
-      <div className="text-3xl mb-4">{icon}</div>
-      <div className="font-bold text-lg">{title}</div>
-      <p className="mt-2 text-sm text-gray-500">{text}</p>
+
+      <div className="text-3xl mb-4">
+        {icon}
+      </div>
+
+      <div className="font-bold text-lg">
+        {title}
+      </div>
+
+      <p className="mt-2 text-sm text-gray-500">
+        {text}
+      </p>
+
     </div>
   );
 }
@@ -720,22 +1068,39 @@ function Problem({
     <div className="rounded-3xl border border-white/10 bg-black/30 p-8">
 
       <div className="flex items-center gap-4">
-        <div className="text-4xl">{icon}</div>
-        <h3 className="text-2xl font-black">{title}</h3>
+
+        <div className="text-4xl">
+          {icon}
+        </div>
+
+        <h3 className="text-2xl font-black">
+          {title}
+        </h3>
+
       </div>
 
       <p className="mt-6 text-gray-500">
+
         <span className="text-white font-semibold">
           Today:
-        </span>{' '}
+        </span>
+
+        {' '}
+
         {problem}
+
       </p>
 
       <p className="mt-4 text-gray-300 leading-relaxed">
+
         <span className="text-cyan-300 font-semibold">
           XPLBNB:
-        </span>{' '}
+        </span>
+
+        {' '}
+
         {solution}
+
       </p>
 
     </div>
@@ -757,7 +1122,9 @@ function SolutionCard({
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-8 hover:border-cyan-400/20 transition">
 
-      <div className="text-5xl mb-6">{icon}</div>
+      <div className="text-5xl mb-6">
+        {icon}
+      </div>
 
       <div className="text-sm uppercase tracking-widest text-cyan-300 font-bold">
         {title}
@@ -770,9 +1137,19 @@ function SolutionCard({
       <div className="mt-8 space-y-4">
 
         {points.map((point) => (
-          <div key={point} className="flex gap-3 text-gray-400">
-            <span className="text-cyan-300">✓</span>
-            <span>{point}</span>
+          <div
+            key={point}
+            className="flex gap-3 text-gray-400"
+          >
+
+            <span className="text-cyan-300">
+              ✓
+            </span>
+
+            <span>
+              {point}
+            </span>
+
           </div>
         ))}
 
@@ -831,9 +1208,19 @@ function Mini({
 }) {
   return (
     <div className="rounded-xl bg-white/5 p-4">
-      <div className="text-xl">{icon}</div>
-      <div className="mt-2 font-bold">{title}</div>
-      <div className="text-sm text-gray-500 mt-1">{text}</div>
+
+      <div className="text-xl">
+        {icon}
+      </div>
+
+      <div className="mt-2 font-bold">
+        {title}
+      </div>
+
+      <div className="text-sm text-gray-500 mt-1">
+        {text}
+      </div>
+
     </div>
   );
 }
