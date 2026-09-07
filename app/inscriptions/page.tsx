@@ -1065,7 +1065,7 @@ export default function InscriptionsPage() {
                 <span className="text-lg font-black text-black">X</span>
               </div>
               <div>
-                <div className="text-xl font-black tracking-tight">XPLBNB</div>
+                <div className="text-xl font-black tracking-tight">XPL.3WORDPIN</div>
                 <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-300/70">Built on Plasma</div>
               </div>
             </Link>
@@ -1099,7 +1099,7 @@ export default function InscriptionsPage() {
                 <span className="text-lg font-black text-black">X</span>
               </div>
               <div>
-                <div className="text-xl font-black tracking-tight">XPLBNB</div>
+                <div className="text-xl font-black tracking-tight">XPL.3WORDPIN</div>
                 <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-300/70">Built on Plasma</div>
               </div>
             </Link>

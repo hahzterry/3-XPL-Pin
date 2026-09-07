@@ -2,33 +2,33 @@
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden border-t border-cyan-400/20 bg-black py-14">
+    <footer className="relative overflow-hidden bg-black border-t border-cyan-400/20 py-14">
       {/* Ambient cyan + pink glow */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-32 bottom-0 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
-        <div className="absolute -right-32 top-0 h-72 w-72 rounded-full bg-pink-500/10 blur-3xl" />
-        <div className="absolute left-1/2 top-0 h-40 w-96 -translate-x-1/2 rounded-full bg-cyan-400/5 blur-3xl" />
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute bottom-0 rounded-full -left-32 h-72 w-72 bg-cyan-400/10 blur-3xl" />
+        <div className="absolute top-0 rounded-full -right-32 h-72 w-72 bg-pink-500/10 blur-3xl" />
+        <div className="absolute top-0 h-40 -translate-x-1/2 rounded-full left-1/2 w-96 bg-cyan-400/5 blur-3xl" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-6">
+      <div className="container relative z-10 px-6 mx-auto">
 
         {/* Main footer */}
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4">
 
           {/* Brand + Mission */}
           <div className="md:col-span-2">
-            <div className="mb-6 flex items-center space-x-3">
+            <div className="flex items-center mb-6 space-x-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-400/30 bg-white/5 shadow-[0_0_25px_rgba(34,211,238,0.15)] backdrop-blur-xl">
                 <img
                   src="/logo.svg"
                   alt="3 Word Pin"
-                  className="h-8 w-8 brightness-0 invert"
+                  className="w-8 h-8 brightness-0 invert"
                 />
               </div>
 
               <div>
                 <span className="text-2xl font-bold tracking-tight text-white">
-                  3 WORD PIN XPLBNB
+                  3 WORD PIN XPL
                 </span>
                 <span className="ml-2 text-sm font-light text-cyan-300">
                   /// KEEP.IT.SIMPLE
@@ -36,22 +36,22 @@ export default function Footer() {
               </div>
             </div>
 
-            <p className="mb-5 max-w-xl text-lg font-semibold leading-relaxed text-white">
+            <p className="max-w-xl mb-5 text-lg font-semibold leading-relaxed text-white">
               Every place. Three words.
             </p>
 
             <p className="max-w-xl text-base leading-relaxed text-white/65">
-              3 Word Pin XPLBNB makes it simple to give any location a memorable
+              3 Word Pin XPL. makes it simple to give any location a memorable
               three-word address that anyone can share, search, and use to
               find you anywhere.
             </p>
 
             {/* XPLBNB value proposition */}
             <div className="mt-7 rounded-2xl border border-cyan-400/20 bg-white/[0.03] p-5 backdrop-blur-xl">
-              <div className="mb-2 flex items-center gap-2">
+              <div className="flex items-center gap-2 mb-2">
                 <span className="text-lg">⚡</span>
                 <h3 className="font-bold text-white">
-                  XPLBNB
+                  XPL.3WORDPIN
                 </h3>
               </div>
 
@@ -89,14 +89,14 @@ export default function Footer() {
             <div className="space-y-4">
               <a
                 href="/"
-                className="block text-sm font-medium text-white/65 transition-colors hover:text-cyan-300"
+                className="block text-sm font-medium transition-colors text-white/65 hover:text-cyan-300"
               >
                 Find a Place
               </a>
 
               <a
                 href="/create"
-                className="block text-sm font-medium text-white/65 transition-colors hover:text-cyan-300"
+                className="block text-sm font-medium transition-colors text-white/65 hover:text-cyan-300"
               >
                 Create a 3 Word Pin
               </a>
@@ -105,7 +105,7 @@ export default function Footer() {
                 href="https://social.3wordpin.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-sm font-medium text-white/65 transition-colors hover:text-pink-300"
+                className="block text-sm font-medium transition-colors text-white/65 hover:text-pink-300"
               >
                 3 Word Pin Social ↗
               </a>
@@ -166,7 +166,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom CTA */}
-        <div className="mt-14 border-t border-white/10 pt-8">
+        <div className="pt-8 border-t mt-14 border-white/10">
           <div className="flex flex-col items-center justify-between gap-5 md:flex-row">
 
             <div className="text-center md:text-left">
@@ -187,7 +187,7 @@ export default function Footer() {
             </a>
           </div>
 
-          <div className="mt-8 flex flex-col items-center justify-between gap-3 text-center md:flex-row">
+          <div className="flex flex-col items-center justify-between gap-3 mt-8 text-center md:flex-row">
             <p className="text-xs text-white/35">
               © 2026 3 Word Pin XRPLBNB. Every place. Three words.
             </p>

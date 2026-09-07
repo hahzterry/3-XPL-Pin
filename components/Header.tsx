@@ -34,28 +34,28 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-cyan-400/10 bg-black/70 backdrop-blur-2xl">
       {/* Plasma glow */}
-      <div className="pointer-events-none absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-cyan-400/70 to-transparent" />
-      <div className="container mx-auto px-6 py-4">
+      <div className="absolute inset-x-0 h-px pointer-events-none -bottom-px bg-gradient-to-r from-transparent via-cyan-400/70 to-transparent" />
+      <div className="container px-6 py-4 mx-auto">
         <div className="flex items-center justify-between gap-6">
           {/* BRAND */}
           <Link
             href="/"
-            className="group flex items-center gap-3 shrink-0"
+            className="flex items-center gap-3 group shrink-0"
           >
             <div className="relative">
-              <div className="absolute inset-0 rounded-xl bg-cyan-400/30 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 transition-opacity duration-300 opacity-0 rounded-xl bg-cyan-400/30 blur-xl group-hover:opacity-100" />
               <div className="relative flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-400/30 bg-gradient-to-br from-cyan-400/15 via-white/5 to-violet-500/15 shadow-[0_0_25px_rgba(34,211,238,0.12)]">
                 <img
                   src="/logo.svg"
                   alt="Gen-Plasma Logo"
-                  className="h-8 w-8 filter brightness-0 invert"
+                  className="w-8 h-8 filter brightness-0 invert"
                 />
               </div>
             </div>
             <div className="flex flex-col leading-none">
               <div className="flex items-baseline gap-2">
                 <span className="text-xl font-black tracking-tight text-white sm:text-2xl">
-                  XPLBNB
+                  XPL.3WORDPIN
                 </span>
                 <span className="hidden text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300/80 sm:inline">
                   {getSubtitle()}
@@ -110,7 +110,7 @@ export default function Header() {
               <Link href="/wallet">
                 <button className="group relative overflow-hidden rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-2.5 text-sm font-semibold text-cyan-300 transition-all duration-200 hover:border-cyan-300/50 hover:bg-cyan-400/15 hover:text-cyan-200 hover:shadow-[0_0_20px_rgba(34,211,238,0.12)]">
                   <span className="relative z-10">My Wallet</span>
-                  <span className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+                  <span className="absolute inset-0 transition-transform duration-500 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:translate-x-full" />
                 </button>
               </Link>
             )}
