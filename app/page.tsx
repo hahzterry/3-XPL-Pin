@@ -35,7 +35,7 @@ export default function Home() {
                 <span className="text-lg font-black text-black">X</span>
               </div>
               <div>
-                <div className="text-xl font-black tracking-tight">XPL.</div>
+                <div className="text-xl font-black tracking-tight">XPL.3WordPin</div>
                 <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-300/70">Built on Plasma</div>
               </div>
             </Link>
