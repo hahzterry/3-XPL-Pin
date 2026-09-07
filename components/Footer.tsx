@@ -20,7 +20,7 @@ export default function Footer() {
             <div className="flex items-center mb-6 space-x-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-cyan-400/30 bg-white/5 shadow-[0_0_25px_rgba(34,211,238,0.15)] backdrop-blur-xl">
                 <img
-                  src="/logo.svg"
+                  src="/logo.png"
                   alt="3 Word Pin"
                   className="w-8 h-8 brightness-0 invert"
                 />
@@ -37,13 +37,13 @@ export default function Footer() {
             </div>
 
             <p className="max-w-xl mb-5 text-lg font-semibold leading-relaxed text-white">
-              Every place. Three words.
+              Three word digital real estate
             </p>
 
             <p className="max-w-xl text-base leading-relaxed text-white/65">
-              3 Word Pin XPL. makes it simple to give any location a memorable
-              three-word address that anyone can share, search, and use to
-              find you anywhere.
+              3 Word Pin XPL makes it simple to give any 16x16 ft location
+              a memorable three word address that anyone can monetize.
+  
             </p>
 
             {/* XPLBNB value proposition */}
@@ -57,26 +57,26 @@ export default function Footer() {
 
               <p className="text-sm leading-relaxed text-white/60">
                 A simpler way to promote and connect businesses, creators,
-                and locations directly with the people they want to reach —
+                and locations directly with the people they want to reach
                 without relying on a middleman to control the relationship
                 or take a middleman fee.
               </p>
 
               <p className="mt-3 text-sm font-semibold text-cyan-300">
-                Direct connection. No middleman fees.
+                No middleman fees.
               </p>
             </div>
 
             {/* Social CTA */}
             <a
-              href="https://social.3wordpin.com"
+              href="https://social.3wordpin.com/pin/s/xpl/"
               target="_blank"
               rel="noopener noreferrer"
               className="mt-6 inline-flex items-center gap-2 rounded-xl border border-pink-400/30 bg-pink-400/5 px-5 py-3 text-sm font-semibold text-pink-300 transition-all duration-300 hover:border-pink-300/60 hover:bg-pink-400/10 hover:text-white hover:shadow-[0_0_30px_rgba(236,72,153,0.18)]"
             >
               💬 3 Word Pin Social
               <span className="text-white/50">—</span>
-              <span>Promote Your XRPLBNB ↗</span>
+              <span>No algorithms ↗</span>
             </a>
           </div>
 
@@ -88,36 +88,36 @@ export default function Footer() {
 
             <div className="space-y-4">
               <a
-                href="/"
+                href="/inscriptions"
                 className="block text-sm font-medium transition-colors text-white/65 hover:text-cyan-300"
               >
-                Find a Place
+                🎨 Customize a 3 Word Pin
               </a>
 
               <a
                 href="/create"
                 className="block text-sm font-medium transition-colors text-white/65 hover:text-cyan-300"
               >
-                Create a 3 Word Pin
+                🪙 Own a 3 Word Pin
               </a>
 
               <a
-                href="https://social.3wordpin.com"
+                href="https://tiktok.com/@3wordpin"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="block text-sm font-medium transition-colors text-white/65 hover:text-pink-300"
               >
-                3 Word Pin Social ↗
+                📲 Follow on TikTok ↗
               </a>
             </div>
 
             <div className="mt-8 rounded-xl border border-white/10 bg-white/[0.025] p-4">
               <p className="font-mono text-xs text-cyan-300">
-                /// your.place.here
+                ///your.place.here
               </p>
 
               <p className="mt-2 text-xs leading-relaxed text-white/45">
-                One simple address that can be shared anywhere.
+                57 trillion 3 Word Pins to claim.
               </p>
             </div>
           </div>
@@ -125,19 +125,18 @@ export default function Footer() {
           {/* XRPLBNB */}
           <div>
             <h4 className="mb-6 text-base font-semibold text-pink-300">
-              XRPLBNB
+              XPL.3WORDPIN
             </h4>
 
             <p className="mb-5 text-sm leading-relaxed text-white/60">
-              Built around a simple idea: connect people directly instead of
-              putting another layer between them.
+              🪙 Own it 💬 Sell it 📲 TikTok review it 🔄.
             </p>
 
             <div className="space-y-3">
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 text-cyan-300">✓</span>
                 <span className="text-sm text-white/65">
-                  Direct connections
+                  No middleman economy
                 </span>
               </div>
 
@@ -151,14 +150,14 @@ export default function Footer() {
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 text-cyan-300">✓</span>
                 <span className="text-sm text-white/65">
-                  Shareable 3 Word Pins
+                  No middleman real estate
                 </span>
               </div>
 
               <div className="flex items-start gap-3">
                 <span className="mt-0.5 text-cyan-300">✓</span>
                 <span className="text-sm text-white/65">
-                  Built for businesses & creators
+                  No middleman social media
                 </span>
               </div>
             </div>
@@ -171,11 +170,11 @@ export default function Footer() {
 
             <div className="text-center md:text-left">
               <p className="text-sm font-semibold text-white">
-                Stop sending complicated directions.
+                Sell digital real estate.
               </p>
 
               <p className="mt-1 text-sm text-white/40">
-                Share three words instead.
+                You can share in three words.
               </p>
             </div>
 
@@ -183,13 +182,13 @@ export default function Footer() {
               href="/create"
               className="rounded-xl bg-gradient-to-r from-cyan-400 via-white to-pink-400 px-6 py-3 text-sm font-bold text-black transition-all duration-300 hover:scale-105 hover:shadow-[0_0_30px_rgba(34,211,238,0.25)]"
             >
-              Create Your 3 Word Pin
+              🪙 Own a 3 Word Pin
             </a>
           </div>
 
           <div className="flex flex-col items-center justify-between gap-3 mt-8 text-center md:flex-row">
             <p className="text-xs text-white/35">
-              © 2026 3 Word Pin XRPLBNB. Every place. Three words.
+              © 2026 3 Word Pin XPL.3WORDPIN
             </p>
 
             <div className="font-mono text-xs">
