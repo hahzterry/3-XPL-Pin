@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 
 export default function Home() {
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function Home() {
 
       <div className="relative z-10">
 
-        {/* HEADER – simplified */}
+        {/* HEADER */}
         <header className="sticky top-0 z-50 border-b border-white/10 bg-black/70 backdrop-blur-2xl">
           <div className="flex items-center justify-between px-6 py-4 mx-auto max-w-7xl">
             <Link href="/" className="flex items-center gap-3">
@@ -35,7 +36,7 @@ export default function Home() {
                 <span className="text-lg font-black text-black">X</span>
               </div>
               <div>
-                <div className="text-xl font-black tracking-tight">XPL.3WordPin</div>
+                <div className="text-xl font-black tracking-tight">XPL.3WORDPIN</div>
                 <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-300/70">Built on Plasma</div>
               </div>
             </Link>
@@ -49,17 +50,15 @@ export default function Home() {
 
         <main>
 
-          {/* HERO – new simplified version */}
+          {/* HERO */}
           <section className="px-6 pt-24 mx-auto max-w-7xl pb-28 md:pt-36 md:pb-36">
             <div className="max-w-6xl mx-auto text-center">
 
-              {/* Eyebrow */}
               <div className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold border rounded-full border-cyan-400/20 bg-cyan-400/5 text-cyan-300">
                 <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                 No middleman fees
               </div>
 
-              {/* H1 */}
               <h1 className="mt-8 text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.9]">
                 Turn a 16x16 ft unique
                 <br />
@@ -73,7 +72,6 @@ export default function Home() {
                 </span>
               </h1>
 
-              {/* Description */}
               <p className="max-w-4xl mx-auto mt-8 text-xl font-semibold leading-relaxed text-gray-200 md:text-2xl lg:text-3xl">
                 Be the first to own your 3 Word Pin. Rent it for passive income,
                 flip it to the highest bidder, or spend it as{' '}
@@ -83,7 +81,6 @@ export default function Home() {
                 , all for just pennies per transaction.
               </p>
 
-              {/* Three Buttons */}
               <div className="flex flex-wrap justify-center gap-4 mt-10">
                 <a
                   href="https://3wordpin.com"
@@ -107,7 +104,7 @@ export default function Home() {
                 >
                   💬 Create 3 Word Pin Social
                 </a>
-                                <a
+                <a
                   href="https://matcha.xyz/?preset=popular&networks=9745"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -115,7 +112,7 @@ export default function Home() {
                 >
                   🔁 Swap
                 </a>
-                                <a
+                <a
                   href="https://stargate.finance/?dstChain=plasma&dstToken=0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -125,14 +122,13 @@ export default function Home() {
                 </a>
               </div>
 
-              {/* Quick stats or trust? */}
               <p className="mt-6 text-sm text-gray-500">
                 Own a piece of the new 3 Word Pin address economy.
               </p>
             </div>
           </section>
 
-          {/* USE CASES: Hosts, Drivers, Delivery, POS */}
+          {/* USE CASES */}
           <section className="px-6 mx-auto max-w-7xl pb-28">
             <div className="grid gap-6 md:grid-cols-2">
 
@@ -217,32 +213,29 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="px-8 py-4 font-bold transition border rounded-xl bg-cyan-400/20 border-cyan-400/30 text-cyan-300 hover:bg-cyan-400/30"
               >
-                🔎 https://plasmascan.to/
+                🔎 plasmascan.to
               </a>
             </div>
           </section>
 
-          {/* APP DOWNLOAD — with background video */}
+          {/* APP DOWNLOAD — with Twitter/X embed */}
           <section className="relative overflow-hidden border-y border-white/10">
-            {/* Background Video */}
-            <div className="absolute inset-0 w-full h-full pointer-events-none">
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="object-cover w-full h-full opacity-20"
-                poster="https://img.pikbest.com/backgrounds/20211015/abstract-neon-lights-dark-background-video_6229031.jpg"
-              >
-                <source
-                  src="https://x.com/Plasma/status/2067215787945779394/video/1"
-                  type="video/mp4"
-                />
-                Your browser does not support the video tag.
-              </video>
-              {/* Dark overlay for readability */}
-              <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+            {/* Background Twitter/X Embed */}
+            <div className="absolute inset-0 flex items-center justify-center w-full h-full overflow-hidden pointer-events-none opacity-10">
+              <div className="scale-150">
+                <blockquote className="twitter-tweet" data-dnt="true" data-theme="dark">
+                  <a href="https://twitter.com/Plasma/status/2067215787945779394"></a>
+                </blockquote>
+              </div>
             </div>
+            <Script
+              async
+              src="https://platform.twitter.com/widgets.js"
+              strategy="afterInteractive"
+            />
+
+            {/* Dark overlay for readability */}
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
 
             {/* Content */}
             <div className="relative z-10 max-w-5xl px-6 py-24 mx-auto text-center">
@@ -273,11 +266,19 @@ export default function Home() {
               <p className="mt-6 text-2xl font-bold text-cyan-300">
                 20% back on flights, hotels, and more
               </p>
-              <p className="mt-2 text-sm text-gray-400">
-                <a href="https://www.plasma.org/download/travel" target="_blank" rel="noopener noreferrer" className="underline transition hover:text-white">
-                  https://www.plasma.org/download/travel
+              <div className="mt-4">
+                <a
+                  href="https://www.plasma.org/download/travel"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium text-white transition border rounded-lg border-white/20 bg-white/5 hover:bg-white/10 hover:border-white/40"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Travel Perks → Get 20% back
                 </a>
-              </p>
+              </div>
             </div>
           </section>
 
@@ -291,7 +292,7 @@ export default function Home() {
               <div className="text-sm text-gray-600">Find it. Own it. Sell it.</div>
             </div>
             <div className="text-sm text-gray-600">
-              Built on Plasma • © {new Date().getFullYear()} XPL.3WordPin.com
+              Built on Plasma • © {new Date().getFullYear()} XPL.3WORDPIN
             </div>
           </div>
         </footer>

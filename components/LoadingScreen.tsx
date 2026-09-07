@@ -40,7 +40,7 @@ export default function LoadingScreen() {
       <div className="relative z-10 text-center">
         {/* Logo */}
         <div className="mb-8">
-          <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg border border-white/20 mx-auto mb-4">
+          <div className="flex items-center justify-center w-20 h-20 mx-auto mb-4 border shadow-lg bg-white/10 backdrop-blur-sm rounded-2xl border-white/20">
             <img 
               src="/logo.svg" 
               alt="Gen-Plasma Logo" 
@@ -51,23 +51,23 @@ export default function LoadingScreen() {
 
         {/* Title */}
         <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold plasma-gradient-text mb-2">
-            Gen-Plasma
+          <h1 className="mb-2 text-4xl font-bold md:text-5xl plasma-gradient-text">
+            3 Word Pin XPL
           </h1>
-          <p className="text-forest-300 text-lg font-light">
-            Generative Collection
+          <p className="text-lg font-light text-forest-300">
+            Digital Real Estate on the Plasma Network
           </p>
         </div>
 
         {/* Loading animation */}
-        <div className="flex items-center justify-center space-x-2 mb-4">
-          <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce"></div>
-          <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-          <div className="w-2 h-2 bg-forest-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+        <div className="flex items-center justify-center mb-4 space-x-2">
+          <div className="w-2 h-2 rounded-full bg-forest-400 animate-bounce"></div>
+          <div className="w-2 h-2 rounded-full bg-forest-400 animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+          <div className="w-2 h-2 rounded-full bg-forest-400 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
         </div>
 
         {/* Loading text */}
-        <p className="text-gray-400 text-sm animate-pulse">
+        <p className="text-sm text-gray-400 animate-pulse">
           Initializing plasma dynamics...
         </p>
       </div>
