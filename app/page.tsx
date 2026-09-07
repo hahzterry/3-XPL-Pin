@@ -193,7 +193,7 @@ export default function Home() {
               </p>
               <div className="mt-10">
                 <a
-                  href="https://social.3wordpin.com"
+                  href="https://social.3wordpin.com/pin/s/xpl/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-8 py-4 font-bold text-pink-300 transition border rounded-xl bg-pink-400/20 border-pink-400/30 hover:bg-pink-400/30"
@@ -321,7 +321,7 @@ export default function Home() {
         <footer className="border-t border-white/10">
           <div className="flex flex-col items-center justify-between gap-4 px-6 py-10 mx-auto max-w-7xl md:flex-row">
             <div>
-              <div className="font-black">XPL.</div>
+              <div className="font-black">XPL.3WORDPIN</div>
               <div className="text-sm text-gray-600">Find it. Own it. Sell it.</div>
             </div>
             <div className="text-sm text-gray-600">
